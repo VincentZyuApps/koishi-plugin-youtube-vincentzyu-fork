@@ -10,6 +10,7 @@
 ## preview
 ![text_and_image](text_and_image.png)
 ![only_image](only_image.png)
+
 ## How to use
 
 ### google api key
@@ -29,3 +30,12 @@
 * 我只测了socks5 axios，其他的不知道(能不能用(
 
 -----
+
+## Dev
+```shell
+cd G:\GGames\Minecraft\shuyeyun\qq-bot\koishi-dev\koishi-dev-3
+npm login --registry https://registry.npmjs.org
+npm run pub youtube-vincentzyu-fork -- --registry https://registry.npmjs.org  
+npm view koishi-plugin-youtube-vincentzyu-fork --registry https://registry.npmjs.org
+npm dist-tag add koishi-plugin-youtube-vincentzyu-fork@2.0.0-vincentzyufork.alpha.3+20251007 latest --registry https://registry.npmjs.org
+```
