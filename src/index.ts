@@ -152,7 +152,7 @@ export const Config: z<Config> = z.intersect([
       z.const(REQUEST_LIB.AXIOS).description("使用axios库进行网络请求"),
     ])
       .role('radio')
-      .default(REQUEST_LIB.CTX_HTTP)
+      .default(REQUEST_LIB.AXIOS)
       .description("使用的网络请求的库"),
     proxyProtocol: z.union([
       z.const(PROXY_PROTOCOL.HTTP).description("HTTP 代理"),
@@ -162,7 +162,7 @@ export const Config: z<Config> = z.intersect([
       z.const(PROXY_PROTOCOL.SOCKS5H).description("SOCKS5h 代理 (支持远程DNS)"),
     ])
       .role('radio')
-      .default(PROXY_PROTOCOL.SOCKS5)
+      .default(PROXY_PROTOCOL.SOCKS5H)
       .description("代理协议"),
     proxyIp: z.string()
       .role("link")
@@ -170,7 +170,7 @@ export const Config: z<Config> = z.intersect([
       .description("代理的地址，ip或域名"),
     proxyPort: z.number()
       .min(0).max(65535).step(1)
-      .default(7890)
+      .default(7891)
       .description("代理的端口，[0, 65535]"),
     userAgent: z.string()
       .role('textarea', { rows: [3, 5] })
@@ -181,7 +181,7 @@ export const Config: z<Config> = z.intersect([
 
   z.object({
     hideDescription: z.boolean()
-      .description("是否隐藏视频简介").default(true),
+      .description("是否隐藏视频简介").default(false),
     maxDescriptionLength: z.number()
       .default(300)
       .description("视频简介最大长度。如果不隐藏，那么只会显示这么多字符"),
@@ -190,11 +190,12 @@ export const Config: z<Config> = z.intersect([
 
   z.object({
     msgFormArr: z.array(
-      z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE, MSG_FORM.FORWARD])
+      // z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE, MSG_FORM.FORWARD])
+      z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE])
     )
       .default([MSG_FORM.TEXT])
       .role("checkbox")
-      .description("消息发送形式。text=文本, image=图片, forward=合并转发(仅适用于onebot)"),
+      .description("消息发送形式。text=文本, image=图片, forward=合并转发(仅适用于onebot) <br/> *todo: 实现 forward*"),
     quoteWhenSend: z.boolean()
       .default(true)
       .description("发消息的时候带有引用")
@@ -223,8 +224,8 @@ export const Config: z<Config> = z.intersect([
       ])
       .description('ytb有些内容不适合发到国内的某些聊天平台，比如onebot，所以我加了这个配置项hhh'),
     sendWhiteListHint: z.boolean()
-      .default(true)
-      .description('是否发送白名单校验结果提示')
+      .default(false)
+      .description('是否发送白名单校验结果提示 <br/> 发送1:✅ 白名单用户，开始解析链接... <br/> 发送2:❌ 非白名单用户，已跳过解析。')
   })
     .description("平台白名单配置"),
 
@@ -327,7 +328,7 @@ export function apply(ctx: Context, config: Config) {
             h.image(thumbnailBuffer, parseResult.coverMime),
             h.text(`标题：\t${parseResult.titleText}`),
             h.text(`频道：\t${parseResult.channelText}`),
-            h.text(`发布时间：\t${parseResult.publishTimeText}`),
+            h.text(`时间：\t${parseResult.publishTimeText}`),
             h.text(`播放量：\t${parseResult.viewCountText}`),
             h.text(`简介：\t${parseResult.descriptionText}`),
             h.text(`标签：\t${parseResult.tagText}`)

@@ -1,4 +1,4 @@
-# koishi-plugin-youtube
+# koishi-plugin-youtube-vincentzyu-fork
 
 <!-- [![npm](https://img.shields.io/npm/v/koishi-plugin-youtube?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-youtube) -->
 [![npm](https://img.shields.io/npm/v/koishi-plugin-youtube-vincentzyu-fork?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-youtube-vincentzyu-fork)
@@ -6,8 +6,12 @@
 
 youtube plugin for koishi, vincentzyu fork version
 
+## preview
+![text_and_image](text_and_image.png)
+![only_image](only_image.png)
 ## How to use
 
+### google api key
 * 根据Google开发者文档指引，创建一个app并且打开v3 api，记下你的apikey
   [YouTube Data API Overview  |  Google Developers](https://developers.google.com/youtube/v3/getting-started)
 
@@ -17,10 +21,10 @@ youtube plugin for koishi, vincentzyu fork version
   * https://youtu.be/{id}
   * https://www.youtube.com/watch?v={id}
 
------
+### work mode
+* 支持两种工作模式： `standalone` 和 `distributed`
 
-## dev
-```shell
-cd youtube-vincentzyu-fork
-yarn add axios socks-proxy-agent
-```
+### proxy
+* 我只测了socks5 axios，其他的不知道(能不能用(
+
+-----
