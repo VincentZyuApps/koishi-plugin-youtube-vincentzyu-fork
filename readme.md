@@ -4,7 +4,8 @@
 [![npm](https://img.shields.io/npm/v/koishi-plugin-youtube-vincentzyu-fork?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-youtube-vincentzyu-fork)
 
 
-youtube plugin for koishi, vincentzyu fork version
+> youtube plugin for koishi, vincentzyu fork version
+> forked from https://github.com/H4M5TER/koishi-plugin-youtube
 
 ## preview
 ![text_and_image](text_and_image.png)
