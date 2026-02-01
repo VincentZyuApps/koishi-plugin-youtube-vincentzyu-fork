@@ -4,7 +4,7 @@ import { Context } from 'koishi';
 import fastify, { FastifyInstance } from 'fastify';
 import { renderYoutubeVideoImage, YoutubeVideoPayload } from './render';
 import { parseYoutubeVideo } from './parse';
-import { Config } from './index';
+import { Config } from './config';
 
 // The payload from the request will be slightly different,
 // as JSON can't handle ArrayBuffer directly.

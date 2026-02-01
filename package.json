@@ -1,6 +1,6 @@
 {
   "name": "koishi-plugin-youtube-vincentzyu-fork",
-  "version": "2.0.0-vincentzyufork.alpha.3+20251007",
+  "version": "2.0.0-vincentzyufork.beta.1+20260201",
   "description": "检测聊天中的youtube链接，解析视频信息并返回 文字/图片形式的概览。 fork from https://github.com/H4M5TER/koishi-plugin-youtube",
   "author": {
     "name": "TEDIORELEE",

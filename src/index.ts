@@ -1,5 +1,5 @@
 // index.ts
-import { Context, h, Schema, z } from 'koishi'
+import { Context, h } from 'koishi'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import axios from 'axios'
@@ -7,6 +7,18 @@ import axios from 'axios'
 import { renderYoutubeVideoImage } from './render';
 import { startRestService } from './rest_service';
 import { parseYoutubeVideo, extractYoutubeId } from './parse';
+
+// 从 config.ts 导入配置相关内容
+export {
+  Config,
+  REQUEST_LIB,
+  MSG_FORM,
+  PROXY_PROTOCOL,
+  type Config as ConfigType,
+  type RequestLibType,
+  type ProxyProtocolType,
+} from './config';
+import { Config, REQUEST_LIB, MSG_FORM } from './config';
 
 export const inject = {
   // required: ["http"],
@@ -71,189 +83,6 @@ export const usage = `
 <h3>插件许可声明</h3>
 <p>本插件为开源免费项目，基于 MIT 协议开放。欢迎修改、分发与二次开发。</p>
 `
-
-export const REQUEST_LIB = {
-  CTX_HTTP: 'ctx_http',
-  AXIOS: 'axios',
-} as const;
-export type RequestLibType = typeof REQUEST_LIB[keyof typeof REQUEST_LIB];
-
-export const MSG_FORM = {
-  TEXT: 'text',
-  IMAGE: 'image',
-  FORWARD: 'forward',
-} as const;
-
-export const PROXY_PROTOCOL = {
-  HTTP: 'http',
-  HTTPS: 'https',
-  SOCKS4: 'socks4',
-  SOCKS5: 'socks5',
-  SOCKS5H: 'socks5h',
-} as const;
-export type ProxyProtocolType = typeof PROXY_PROTOCOL[keyof typeof PROXY_PROTOCOL];
-
-
-export interface Config {
-  youtubeApiKey: string,
-  enableParseUrlFromPlatformSession: boolean,
-  middlewareWorkMode: 'standalone' | 'rest_client';
-  restClientTargetUrl: string;
-
-  requestLib: RequestLibType;
-  proxyProtocol: ProxyProtocolType;
-  proxyIp: string;
-  proxyPort: number;
-  userAgent: string;
-
-  hideDescription: boolean,
-  maxDescriptionLength: number,
-
-  msgFormArr: Array<string>,
-  quoteWhenSend: boolean,
-
-  platformWhitelistArr: {
-    platformName: string,
-    userIdWhilelist: Array<string>,
-  }[]
-  sendWhiteListHint: boolean;
-
-  enableRestfulService: boolean
-  restServiceBindIp: string
-  restServiceBindPort: number
-
-  enableVerboseSessionOutput: boolean,
-  enableVerboseConsoleOutput: boolean,
-}
-
-
-export const Config: z<Config> = z.intersect([
-  z.object({
-    youtubeApiKey: z.string()
-      .required()
-      .description("(必填) 请在此填写你的Youtube API Key     → → → → →"),
-    enableParseUrlFromPlatformSession: z.boolean()
-      .default(true)
-      .description("是否启用从平台聊天会话中解析URL"),
-    middlewareWorkMode: z.union([
-      z.const('standalone').description("独立模式"),
-      z.const('rest_client').description("REST 客户端模式")
-    ]).default('standalone').role('radio')
-      .description("工作模式"),
-    restClientTargetUrl: z.string()
-      .default("http://127.0.0.1:8020")
-      .description("REST 客户端模式下，目标服务器地址（实例B的地址）")
-  })
-    .description("基础配置"),
-
-  z.object({
-    requestLib: z.union([
-      z.const(REQUEST_LIB.CTX_HTTP).description("使用koishi提供的ctx.http进行网络请求"),
-      z.const(REQUEST_LIB.AXIOS).description("使用axios库进行网络请求"),
-    ])
-      .role('radio')
-      .default(REQUEST_LIB.AXIOS)
-      .description("使用的网络请求的库"),
-    proxyProtocol: z.union([
-      z.const(PROXY_PROTOCOL.HTTP).description("HTTP 代理"),
-      z.const(PROXY_PROTOCOL.HTTPS).description("HTTPS 代理"),
-      z.const(PROXY_PROTOCOL.SOCKS4).description("SOCKS4 代理"),
-      z.const(PROXY_PROTOCOL.SOCKS5).description("SOCKS5 代理"),
-      z.const(PROXY_PROTOCOL.SOCKS5H).description("SOCKS5h 代理 (支持远程DNS)"),
-    ])
-      .role('radio')
-      .default(PROXY_PROTOCOL.SOCKS5H)
-      .description("代理协议"),
-    proxyIp: z.string()
-      .role("link")
-      .default("127.0.0.1")
-      .description("代理的地址，ip或域名"),
-    proxyPort: z.number()
-      .min(0).max(65535).step(1)
-      .default(7891)
-      .description("代理的端口，[0, 65535]"),
-    userAgent: z.string()
-      .role('textarea', { rows: [3, 5] })
-      .default("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36")
-      .description("ua / 用户代理 / 使用者代理程式")
-  })
-    .description("网络请求代理配置"),
-
-  z.object({
-    hideDescription: z.boolean()
-      .description("是否隐藏视频简介").default(false),
-    maxDescriptionLength: z.number()
-      .default(300)
-      .description("视频简介最大长度。如果不隐藏，那么只会显示这么多字符"),
-  })
-    .description("视频简介配置"),
-
-  z.object({
-    msgFormArr: z.array(
-      // z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE, MSG_FORM.FORWARD])
-      z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE])
-    )
-      .default([MSG_FORM.TEXT])
-      .role("checkbox")
-      .description("消息发送形式。text=文本, image=图片, forward=合并转发(仅适用于onebot) <br/> *todo: 实现 forward*"),
-    quoteWhenSend: z.boolean()
-      .default(true)
-      .description("发消息的时候带有引用")
-  })
-    .description("消息发送形式配置"),
-
-  z.object({
-    platformWhitelistArr: z.array(
-      z.object({
-        platformName: z.string()
-          .required()
-          .description('平台名称'),
-        userIdWhilelist: z.array(
-          z.string().required().description('白名单用户ID')
-        )
-          .role('table')
-          .description('白名单用户ID列表')
-      })
-    )
-      .role('table')
-      .default([
-        {
-          platformName: 'onebot',
-          userIdWhilelist: ['1830540513']
-        }
-      ])
-      .description('ytb有些内容不适合发到国内的某些聊天平台，比如onebot，所以我加了这个配置项hhh'),
-    sendWhiteListHint: z.boolean()
-      .default(false)
-      .description('是否发送白名单校验结果提示 <br/> 发送1:✅ 白名单用户，开始解析链接... <br/> 发送2:❌ 非白名单用户，已跳过解析。')
-  })
-    .description("平台白名单配置"),
-
-  z.object({
-    enableRestfulService: z.boolean()
-      .default(false)
-      .description("是否启用 RESTful 服务, 为外界提供图片渲染"),
-    restServiceBindIp: z.string()
-      .default("0.0.0.0")
-      .description("RESTful 服务绑定的IP地址"),
-    restServiceBindPort: z.number()
-      .min(1024).max(65535).step(1)
-      .default(18020)
-      .description("RESTful 服务绑定的端口"),
-  }).description("rest服务配置"),
-
-  z.object({
-
-    enableVerboseSessionOutput: z.boolean()
-      .default(false)
-      .description('是否启用 session 调试输出'),
-    enableVerboseConsoleOutput: z.boolean()
-      .default(false)
-      .description('是否启用 console 调试输出')
-  })
-    .description("调试配置")
-
-])
 
 // REST 客户端函数
 async function callRestService(ctx: Context, config: Config, url: string, endpoint: string) {
@@ -378,11 +207,65 @@ export function apply(ctx: Context, config: Config) {
       hintMsgId!==undefined && await session.bot.deleteMessage(session.channelId, hintMsgId[0]);
 
     } catch (error) {
-      const errorMsg = config.middlewareWorkMode === 'rest_client' 
-        ? 'rest_client工作模式时发生错误:'
-        : 'standalone工作模式时发生错误:';
-      await session.send(`${h.quote(session.messageId)}${errorMsg}\n\t ${config.enableVerboseSessionOutput ? error.message : ''}`);
-      logger.error(`${errorMsg}\n\t ${config.enableVerboseConsoleOutput ? error.message : ''}`);
+      const workModeText = config.middlewareWorkMode === 'rest_client' 
+        ? 'REST客户端模式'
+        : '独立模式';
+      
+      // 构建简要错误信息
+      let briefErrorMsg = `⚠️ YouTube视频解析失败 (${workModeText})`;
+      
+      // 根据错误类型生成简要提示
+      if (error.statusCode === 400) {
+        briefErrorMsg += '\n❌ API请求参数错误 (400)，请检查API Key是否有效';
+      } else if (error.statusCode === 403) {
+        briefErrorMsg += '\n❌ API访问被拒绝 (403)，可能是配额用尽或API Key权限不足';
+      } else if (error.statusCode === 404) {
+        briefErrorMsg += '\n❌ 视频不存在或已被删除 (404)';
+      } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+        briefErrorMsg += '\n❌ 网络连接失败，请检查代理配置';
+      } else if (error.code === 'ETIMEDOUT' || error.code === 'ESOCKETTIMEDOUT') {
+        briefErrorMsg += '\n❌ 请求超时，请检查网络或代理';
+      } else {
+        briefErrorMsg += `\n❌ ${error.message || '未知错误'}`;
+      }
+      
+      // 构建详细错误信息
+      let detailedErrorMsg = briefErrorMsg;
+      if (config.enableVerboseSessionOutput) {
+        detailedErrorMsg += '\n\n📋 详细调试信息:';
+        detailedErrorMsg += `\n  - 错误消息: ${error.message}`;
+        if (error.videoId) {
+          detailedErrorMsg += `\n  - 视频ID: ${error.videoId}`;
+        }
+        if (error.statusCode) {
+          detailedErrorMsg += `\n  - HTTP状态码: ${error.statusCode}`;
+        }
+        if (error.apiResponse) {
+          const apiError = error.apiResponse?.error;
+          if (apiError) {
+            detailedErrorMsg += `\n  - API错误码: ${apiError.code}`;
+            detailedErrorMsg += `\n  - API错误信息: ${apiError.message}`;
+            if (apiError.errors && apiError.errors.length > 0) {
+              detailedErrorMsg += `\n  - API错误原因: ${apiError.errors[0].reason}`;
+            }
+          }
+        }
+        if (error.code) {
+          detailedErrorMsg += `\n  - 错误代码: ${error.code}`;
+        }
+      }
+      
+      // 发送到聊天平台
+      await session.send(`${h.quote(session.messageId)}${config.enableVerboseSessionOutput ? detailedErrorMsg : briefErrorMsg}`);
+      
+      // 输出到控制台日志
+      logger.error(`YouTube视频解析失败 (${workModeText})`);
+      if (config.enableVerboseConsoleOutput) {
+        logger.error(`[详细错误] ${error.message}`);
+        if (error.stack) {
+          logger.error(`[错误堆栈] ${error.stack}`);
+        }
+      }
     }
   })
 }

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Context } from 'koishi';
-import { Config, REQUEST_LIB, PROXY_PROTOCOL } from './index';
+import { Config, REQUEST_LIB, PROXY_PROTOCOL } from './config';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
@@ -96,8 +96,37 @@ export async function fetchVideoDataFromAPI(ctx: Context, config: Config, id: st
       return response.data;
     }
   } catch (error) {
-    ctx.logger.error(`Failed to fetch data from YouTube API for id: ${id}`);
-    throw error;
+    const logger = ctx.logger;
+    logger.error(`Failed to fetch data from YouTube API for id: ${id}`);
+    
+    if (config.enableVerboseConsoleOutput) {
+      logger.error(`[详细调试] YouTube API 请求失败:`);
+      logger.error(`  - 请求URL: ${url.replace(config.youtubeApiKey, 'API_KEY_HIDDEN')}`);
+      logger.error(`  - 代理配置: ${config.proxyProtocol}://${config.proxyIp}:${config.proxyPort}`);
+      logger.error(`  - 请求库: ${config.requestLib}`);
+      
+      if (axios.isAxiosError(error)) {
+        logger.error(`  - HTTP状态码: ${error.response?.status}`);
+        logger.error(`  - HTTP状态文本: ${error.response?.statusText}`);
+        logger.error(`  - 响应数据: ${JSON.stringify(error.response?.data)}`);
+        logger.error(`  - 错误消息: ${error.message}`);
+        if (error.code) {
+          logger.error(`  - 错误代码: ${error.code}`);
+        }
+      } else if (error instanceof Error) {
+        logger.error(`  - 错误类型: ${error.name}`);
+        logger.error(`  - 错误消息: ${error.message}`);
+        logger.error(`  - 错误堆栈: ${error.stack}`);
+      }
+    }
+    
+    // 包装错误，携带更多上下文信息
+    const wrappedError = new Error(error.message) as any;
+    wrappedError.originalError = error;
+    wrappedError.videoId = id;
+    wrappedError.statusCode = axios.isAxiosError(error) ? error.response?.status : undefined;
+    wrappedError.apiResponse = axios.isAxiosError(error) ? error.response?.data : undefined;
+    throw wrappedError;
   }
 }
 
