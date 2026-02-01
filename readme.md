@@ -39,3 +39,16 @@ npm run pub youtube-vincentzyu-fork -- --registry https://registry.npmjs.org
 npm view koishi-plugin-youtube-vincentzyu-fork --registry https://registry.npmjs.org
 npm dist-tag add koishi-plugin-youtube-vincentzyu-fork@2.0.0-vincentzyufork.alpha.3+20251007 latest --registry https://registry.npmjs.org
 ```
+
+---
+
+## commit msg
+
+### commit 3ee8d4f6c5c8743d31eeecf3a4516a019e3a01e4 (HEAD -> master)
+- Author: 84 bawuyinguo root <1830540513zyu@gmail.com>
+- Date:   Sun Feb 1 17:21:33 2026 +0800
+
+  > 2.0.0-vincentzyufork.beta.1+20260201 refactor: 拆分config配置文件 & 增强调试日志输出 & 添加emoji美化
+
+### 前面的
+  > 忘了，反正你看到的features都是前面更新的
