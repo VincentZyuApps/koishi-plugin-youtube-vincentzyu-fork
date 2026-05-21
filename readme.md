@@ -4,6 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/koishi-plugin-youtube-vincentzyu-fork?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-youtube-vincentzyu-fork)
 [![npm-download](https://img.shields.io/npm/dm/koishi-plugin-youtube-vincentzyu-fork?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-youtube-vincentzyu-fork)
+
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork)
 [![Gitee](https://img.shields.io/badge/Gitee-C71D23?style=for-the-badge&logo=gitee&logoColor=white)](https://gitee.com/vincent-zyu/koishi-plugin-youtube-vincentzyu-fork)
 [![Koishi Forum](https://img.shields.io/badge/forum.koishi.xyz_topic_11779-5546A3?style=for-the-badge&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Ff%2Ff3%2FKoishi.js_Logo.png&logoColor=white)](https://forum.koishi.xyz/t/topic/11779)
@@ -33,27 +34,3 @@
 ### proxy
 * 我只测了socks5 axios，其他的不知道(能不能用(
 
------
-
-## Dev
-```shell
-cd G:\GGames\Minecraft\shuyeyun\qq-bot\koishi-dev\koishi-dev-3
-npm login --registry https://registry.npmjs.org
-npm run pub youtube-vincentzyu-fork -- --registry https://registry.npmjs.org  
-npm view koishi-plugin-youtube-vincentzyu-fork --registry https://registry.npmjs.org
-npm dist-tag add koishi-plugin-youtube-vincentzyu-fork@2.0.0-vincentzyufork.beta.1+20260201 latest --registry https://registry.npmjs.org
-npm dist-tag ls koishi-plugin-youtube-vincentzyu-fork --registry https://registry.npmjs.org
-```
-
----
-
-## commit msg
-
-### commit 3ee8d4f6c5c8743d31eeecf3a4516a019e3a01e4 (HEAD -> master)
-- Author: 84 bawuyinguo root <1830540513zyu@gmail.com>
-- Date:   Sun Feb 1 17:21:33 2026 +0800
-
-  > 2.0.0-vincentzyufork.beta.1+20260201 refactor: 拆分config配置文件 & 增强调试日志输出 & 添加emoji美化
-
-### 前面的
-  > 忘了，反正你看到的features都是前面更新的
