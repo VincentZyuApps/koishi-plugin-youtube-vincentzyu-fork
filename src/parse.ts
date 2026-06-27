@@ -6,9 +6,10 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 
 const apiEndpointPrefix = 'https://www.googleapis.com/youtube/v3/videos';
 
-// 媒体格式解析工具
+// ===== 🔎 URL 解析工具：从各种 YouTube 链接中提取视频 ID =====
+
 function MediaFormat() {
-  // http://www.youtube.com/embed/m5yCOSHeYn4
+  // 📌 支持 watch / shorts / embed / youtu.be 等常见格式。
   const ytRegEx = /(?:https?:\/\/)?(?:i\.|www\.|img\.)?(?:youtu\.be\/|youtube\.com\/|ytimg\.com\/)(?:shorts\/|embed\/|v\/|vi\/|vi_webp\/|watch\?v=|watch\?.+&v=)([\w-]{11})/
 
   function getIDfromRegEx(src, regEx) {
@@ -17,18 +18,20 @@ function MediaFormat() {
   }
 
   return {
-    // returns only the ID
+    // 🎯 只返回 11 位 YouTube 视频 ID。
     getYoutubeID: function (src) {
       return getIDfromRegEx(src, ytRegEx)
     },
-    // returns main link
+    // 🔗 根据 ID 还原成标准 watch 链接。
     getYoutubeUrl: function (ID) {
       return 'https://www.youtube.com/watch?v=' + ID
     }
   }
 }
 
-// 简易 HTML 实体解码（主要处理 &amp; 等常见场景）
+// ===== 🧼 URL 清洗工具：处理平台转义后的链接 =====
+
+// 🧩 简易 HTML 实体解码，主要处理 &amp; 等常见场景。
 function decodeHtmlEntities(input: string): string {
   if (!input) return input
   return input
@@ -39,7 +42,7 @@ function decodeHtmlEntities(input: string): string {
     .replace(/&#39;/g, "'")
 }
 
-// 规范化原始输入，解决平台转义后的 URL 问题
+// 🧹 规范化原始输入，解决平台转义后的 URL 问题。
 function normalizeInputUrl(raw: string): string {
   if (!raw) return raw
   let s = raw.trim()
@@ -50,7 +53,9 @@ function normalizeInputUrl(raw: string): string {
   return s
 }
 
-// 从 URL 中提取 YouTube 视频 ID
+// ===== 🎬 YouTube 数据获取：ID、API 数据、缩略图 =====
+
+// 🆔 从 URL 中提取 YouTube 视频 ID。
 export function extractYoutubeId(url: string): string | null {
   const src = normalizeInputUrl(url)
   let id
@@ -63,7 +68,7 @@ export function extractYoutubeId(url: string): string | null {
   return id
 }
 
-// 从 YouTube API 获取视频数据
+// 📡 从 YouTube Data API v3 获取视频数据。
 export async function fetchVideoDataFromAPI(ctx: Context, config: Config, id: string) {
   const url = `${apiEndpointPrefix}?id=${id}&key=${config.youtubeApiKey}&part=snippet,contentDetails,statistics,status`;
 
@@ -97,30 +102,30 @@ export async function fetchVideoDataFromAPI(ctx: Context, config: Config, id: st
     }
   } catch (error) {
     const logger = ctx.logger;
-    logger.error(`Failed to fetch data from YouTube API for id: ${id}`);
+    logger.error(`❌ Failed to fetch data from YouTube API for id: ${id}`);
     
     if (config.enableVerboseConsoleOutput) {
-      logger.error(`[详细调试] YouTube API 请求失败:`);
-      logger.error(`  - 请求URL: ${url.replace(config.youtubeApiKey, 'API_KEY_HIDDEN')}`);
-      logger.error(`  - 代理配置: ${config.proxyProtocol}://${config.proxyIp}:${config.proxyPort}`);
-      logger.error(`  - 请求库: ${config.requestLib}`);
+      logger.error(`🧪 [详细调试] YouTube API 请求失败:`);
+      logger.error(`🔗   - 请求URL: ${url.replace(config.youtubeApiKey, 'API_KEY_HIDDEN')}`);
+      logger.error(`🧦   - 代理配置: ${config.proxyProtocol}://${config.proxyIp}:${config.proxyPort}`);
+      logger.error(`📡   - 请求库: ${config.requestLib}`);
       
       if (axios.isAxiosError(error)) {
-        logger.error(`  - HTTP状态码: ${error.response?.status}`);
-        logger.error(`  - HTTP状态文本: ${error.response?.statusText}`);
-        logger.error(`  - 响应数据: ${JSON.stringify(error.response?.data)}`);
-        logger.error(`  - 错误消息: ${error.message}`);
+        logger.error(`🌐   - HTTP状态码: ${error.response?.status}`);
+        logger.error(`🌐   - HTTP状态文本: ${error.response?.statusText}`);
+        logger.error(`📦   - 响应数据: ${JSON.stringify(error.response?.data)}`);
+        logger.error(`❌   - 错误消息: ${error.message}`);
         if (error.code) {
-          logger.error(`  - 错误代码: ${error.code}`);
+          logger.error(`🏷️   - 错误代码: ${error.code}`);
         }
       } else if (error instanceof Error) {
-        logger.error(`  - 错误类型: ${error.name}`);
-        logger.error(`  - 错误消息: ${error.message}`);
-        logger.error(`  - 错误堆栈: ${error.stack}`);
+        logger.error(`🏷️   - 错误类型: ${error.name}`);
+        logger.error(`❌   - 错误消息: ${error.message}`);
+        logger.error(`📚   - 错误堆栈: ${error.stack}`);
       }
     }
     
-    // 包装错误，携带更多上下文信息
+    // 📦 包装错误，携带更多上下文信息，方便上层生成更清楚的错误提示。
     const wrappedError = new Error(error.message) as any;
     wrappedError.originalError = error;
     wrappedError.videoId = id;
@@ -130,7 +135,7 @@ export async function fetchVideoDataFromAPI(ctx: Context, config: Config, id: st
   }
 }
 
-// 下载缩略图
+// 🖼️ 下载缩略图，后续会作为文本消息图片和 Puppeteer 渲染素材。
 export async function downloadThumbnail(ctx: Context, config: Config, thumbnailUrl: string): Promise<ArrayBuffer> {
   const headers = { 'User-Agent': config.userAgent };
   let proxyAgent;
@@ -164,12 +169,14 @@ export async function downloadThumbnail(ctx: Context, config: Config, thumbnailU
       return response.data;
     }
   } catch (error) {
-    ctx.logger.error(`Failed to download thumbnail from: ${thumbnailUrl}`);
+    ctx.logger.error(`❌ Failed to download thumbnail from: ${thumbnailUrl}`);
     throw error;
   }
 }
 
-// 解析 YouTube 视频信息并返回 payload
+// ===== 📦 Payload 组装：把 API 结果整理成渲染层需要的数据 =====
+
+// 🧱 解析 YouTube 视频信息并返回统一 payload。
 export async function parseYoutubeVideo(ctx: Context, config: Config, url: string) {
   const id = extractYoutubeId(url);
   if (!id) {
@@ -192,7 +199,7 @@ export async function parseYoutubeVideo(ctx: Context, config: Config, url: strin
     tags,
   } = snippet;
 
-  // 获取播放量，如果不存在则显示为 "未知"
+  // 👀 获取播放量；部分视频可能没有 statistics.viewCount，此时显示为“未知”。
   const viewCount = statistics?.viewCount ? parseInt(statistics.viewCount).toLocaleString() : '未知';
 
   const thumbnailUrl = thumbnails.maxres ? thumbnails.maxres.url : thumbnails.high.url;

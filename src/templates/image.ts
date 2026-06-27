@@ -1,6 +1,10 @@
 import { Context } from 'koishi';
 import { } from 'koishi-plugin-puppeteer';
 import { Buffer } from 'buffer';
+import type { Config } from '../config';
+import { getCustomFontFaceCss } from '../utils';
+
+// ===== 📦 图片模板：解析层传给 Puppeteer 的数据结构 =====
 
 export interface YoutubeVideoPayload {
     coverThumlnail: ArrayBuffer;
@@ -13,28 +17,31 @@ export interface YoutubeVideoPayload {
     viewCountText: string;
 }
 
-const getTemplateStr = async (payload: YoutubeVideoPayload): Promise<string> => {
-    // 将 ArrayBuffer 转换为 Base64 字符串
+// ===== 🎨 图片模板：生成 YouTube 风格的视频预览卡片 HTML =====
+
+const getTemplateStr = async (ctx: Context, payload: YoutubeVideoPayload, config: Config): Promise<string> => {
+    // 🖼️ 将缩略图 ArrayBuffer 转为 data URL，HTML 中可直接使用。
     const coverBase64 = Buffer.from(payload.coverThumlnail).toString('base64');
     const coverDataUrl = `data:${payload.coverMime};base64,${coverBase64}`;
+    const customFontFaceCss = await getCustomFontFaceCss(ctx, config);
+    const fontFamily = config.enableCustomFont
+        ? "'CustomYouTubeFont', 'Roboto', 'Arial', sans-serif"
+        : "'Roboto', 'Arial', sans-serif";
 
     return `
     <html>
     <head>
         <style>
-            @font-face {
-                font-family: 'YouTube Sans';
-                /* 这里可以放置 YouTube 风格字体的链接，但为了简化，我们先用系统字体 */
-            }
+            ${customFontFaceCss}
 
             body {
                 margin: 0;
                 padding: 0;
-                font-family: 'Roboto', 'Arial', sans-serif;
+                font-family: ${fontFamily};
                 background-color: #000;
-                display: flex; /* Use flexbox for centering */
-                justify-content: center; /* Center horizontally */
-                align-items: center; /* Center vertically */
+                display: flex; /* 🎯 使用 flex 让卡片居中 */
+                justify-content: center; /* ↔️ 水平居中 */
+                align-items: center; /* ↕️ 垂直居中 */
             }
             
             .background-container {
@@ -60,16 +67,16 @@ const getTemplateStr = async (payload: YoutubeVideoPayload): Promise<string> => 
                 box-sizing: border-box;
                 display: flex;
                 justify-content: center;
-                padding: 16px; /* Adjusted padding to create a small gap around the card */
+                padding: 16px; /* 📏 给卡片四周留一点呼吸空间 */
             }
 
             .container {
-                width: 90%; /* Use percentage for responsiveness */
-                max-width: 500px; /* Set a max-width to prevent it from getting too wide */
+                width: 90%; /* 📱 百分比宽度，方便不同视口下自适应 */
+                max-width: 500px; /* 🧱 限制最大宽度，避免卡片过宽 */
                 border-radius: 16px;
                 overflow: hidden;
                 
-                /* Frosted glass effect */
+                /* 🧊 毛玻璃效果：让背景封面隐约透出来 */
                 background-color: rgba(40, 40, 40, 0.7);
                 backdrop-filter: blur(20px) saturate(150%);
                 -webkit-backdrop-filter: blur(20px) saturate(150%);
@@ -84,7 +91,7 @@ const getTemplateStr = async (payload: YoutubeVideoPayload): Promise<string> => 
             .cover-container {
                 position: relative;
                 width: 100%;
-                padding-bottom: 56.25%; /* 16:9 ratio */
+                padding-bottom: 56.25%; /* 🎞️ 16:9 视频封面比例 */
             }
 
             .cover {
@@ -97,14 +104,14 @@ const getTemplateStr = async (payload: YoutubeVideoPayload): Promise<string> => 
             }
 
             .content {
-                padding: 16px; /* Reduced padding */
+                padding: 16px; /* 📦 内容区内边距 */
                 display: flex;
                 flex-direction: column;
-                gap: 8px; /* Reduced gap */
+                gap: 8px; /* ↕️ 标题、元信息、简介之间的间距 */
             }
 
             .title {
-                font-size: 24px; /* Adjusted font size */
+                font-size: 24px; /* 🔠 标题字号 */
                 font-weight: 700;
                 line-height: 1.3;
                 color: #ffffff;
@@ -123,7 +130,7 @@ const getTemplateStr = async (payload: YoutubeVideoPayload): Promise<string> => 
             }
 
             .channel {
-                font-size: 16px; /* Adjusted font size */
+                font-size: 16px; /* 👤 频道名称字号 */
                 font-weight: 600;
                 color: #f0f0f0;
                 text-shadow: 0 1px 2px rgba(0,0,0,0.4);
@@ -132,12 +139,12 @@ const getTemplateStr = async (payload: YoutubeVideoPayload): Promise<string> => 
             .stats-row {
                 display: flex;
                 align-items: center;
-                gap: 12px; /* Reduced gap */
+                gap: 12px; /* 📊 发布时间和播放量之间的间距 */
                 flex-wrap: wrap;
             }
 
             .publish-time {
-                font-size: 13px; /* Adjusted font size */
+                font-size: 13px; /* 📅 发布时间字号 */
                 color: #cccccc;
                 font-weight: 400;
                 display: flex;
@@ -147,45 +154,45 @@ const getTemplateStr = async (payload: YoutubeVideoPayload): Promise<string> => 
 
             .publish-time::before {
                 content: "📅";
-                font-size: 11px; /* Adjusted icon size */
+                font-size: 11px; /* 📅 图标字号 */
             }
 
             .view-count {
-                font-size: 14px; /* Adjusted font size */
+                font-size: 14px; /* ▶️ 播放量字号 */
                 color: #00bcd4;
                 font-weight: 600;
                 display: flex;
                 align-items: center;
                 gap: 4px;
                 background: rgba(0, 188, 212, 0.1);
-                padding: 3px 6px; /* Reduced padding */
-                border-radius: 6px; /* Reduced border-radius */
+                padding: 3px 6px; /* 📏 播放量标签内边距 */
+                border-radius: 6px; /* 🔘 播放量标签圆角 */
                 border: 1px solid rgba(0, 188, 212, 0.3);
             }
 
             .view-count::before {
                 content: "▶️";
-                font-size: 12px; /* Adjusted icon size */
+                font-size: 12px; /* ▶️ 图标字号 */
             }
 
             .description {
-                font-size: 14px; /* Adjusted font size */
+                font-size: 14px; /* 📝 简介字号 */
                 line-height: 1.5;
                 color: #e0e0e0;
                 margin-top: 6px;
                 white-space: pre-wrap;
                 background: rgba(255, 255, 255, 0.05);
-                padding: 10px; /* Reduced padding */
+                padding: 10px; /* 📦 简介区域内边距 */
                 border-radius: 8px;
                 border-left: 3px solid rgba(255, 255, 255, 0.2);
             }
 
             .tags {
-                font-size: 12px; /* Adjusted font size */
+                font-size: 12px; /* 🏷️ 标签字号 */
                 color: #64b5f6;
                 font-weight: 500;
                 margin-top: 6px;
-                padding: 6px 10px; /* Reduced padding */
+                padding: 6px 10px; /* 🏷️ 标签区域内边距 */
                 background: rgba(100, 181, 246, 0.1);
                 border-radius: 8px;
                 border: 1px solid rgba(100, 181, 246, 0.2);
@@ -220,24 +227,27 @@ const getTemplateStr = async (payload: YoutubeVideoPayload): Promise<string> => 
     `;
 };
 
+// ===== 📸 图片模板：把 HTML 交给 Puppeteer 截成 base64 图片 =====
+
 export async function renderYoutubeVideoImage(
     ctx: Context,
-    payload: YoutubeVideoPayload
+    payload: YoutubeVideoPayload,
+    config: Config
 ) {
     if (!ctx.puppeteer) {
-        ctx.logger.error("Puppeteer service is not available.");
+        ctx.logger.error("❌ Puppeteer service is not available.");
         return null;
     }
 
     try {
         const page = await ctx.puppeteer.page();
-        const html = await getTemplateStr(payload);
+        const html = await getTemplateStr(ctx, payload, config);
         
         await page.setContent(html, {
             waitUntil: ['domcontentloaded']
         });
 
-        // 调整视图以适应内容
+        // 📐 根据实际 DOM 尺寸调整 viewport，避免截图裁切或留太多空白。
         const mainContainer = await page.$('.main-container');
         const boundingBox = await mainContainer.boundingBox();
         if (boundingBox) {
@@ -247,14 +257,14 @@ export async function renderYoutubeVideoImage(
         const screenshot = await page.screenshot({
             type: 'png',
             encoding: 'base64',
-            fullPage: false // Change to false to capture only the viewport
+            fullPage: false // 🎯 只截当前 viewport，避免截到超出卡片的区域
         });
 
         await page.close();
 
         return screenshot;
     } catch (error) {
-        ctx.logger.error('Error rendering YouTube video image:', error);
+        ctx.logger.error('❌ Error rendering YouTube video image:', error);
         return null;
     }
 }

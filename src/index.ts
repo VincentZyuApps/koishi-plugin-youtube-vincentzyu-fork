@@ -1,90 +1,45 @@
-// index.ts
+// ===== 🚪 插件入口：注册中间件、REST 服务和主流程编排 =====
+
 import { Context, h } from 'koishi'
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
 import axios from 'axios'
 
-import { renderYoutubeVideoImage } from './render';
-import { startRestService } from './rest_service';
+import { startRestService } from './rest';
 import { parseYoutubeVideo, extractYoutubeId } from './parse';
+import { ensureCustomFont } from './utils';
+import { renderYoutubeVideoImage, type YoutubeVideoPayload } from './templates/image';
+import { formatYoutubeVideoText } from './templates/text';
+import { formatYoutubeVideoTextWithImage } from './templates/text-with-image';
+import { formatYoutubeVideoForward } from './templates/forward';
+import { usage } from './usage';
 
-// 从 config.ts 导入配置相关内容
+// ===== ⚙️ 配置导出：让 Koishi 控制台能读取 Schema 和类型 =====
+
 export {
   Config,
+  LEGACY_MSG_FORM,
   REQUEST_LIB,
   MSG_FORM,
   PROXY_PROTOCOL,
   type Config as ConfigType,
   type RequestLibType,
+  type MsgFormType,
   type ProxyProtocolType,
 } from './config';
-import { Config, REQUEST_LIB, MSG_FORM } from './config';
+import { Config, LEGACY_MSG_FORM, REQUEST_LIB, MSG_FORM } from './config';
 
 export const inject = {
-  // required: ["http"],
+  // 🧩 http / puppeteer 都是可选服务：文本模式可不用 Puppeteer，axios 模式可不用 ctx.http。
   optional: ["http", "puppeteer"]
 };
 
 export const name = 'youtube-vincentzyu-fork'
 export const PLUGIN_NAME = name;
 
-export const reusable = true    // 声明此插件可重用
+export const reusable = true    // ♻️ 声明此插件可重用，允许同一插件多实例配置。
+export { usage };
 
-const pkg = JSON.parse(
-  readFileSync(resolve(__dirname, '../package.json'), 'utf-8')
-)
+// ===== 🔌 REST 客户端：当前实例调用远端 YouTube 渲染服务 =====
 
-export const usage = `
-<h1>Koishi 插件：youtube-vincentzyu-fork 视频信息概览</h1>
-<h2>🎯 插件版本：v${pkg.version}</h2>
-<p>插件使用问题 / Bug反馈 / 插件开发交流，欢迎加入QQ群：<b>259248174</b></p>
-
-<h2>📺 功能概述</h2>
-<p>本插件会自动识别群聊中的 YouTube 视频链接，并返回视频预览信息，支持以下两种格式：</p>
-<ul>
-  <li>https://youtu.be/<code>{id}</code></li>
-  <li>https://www.youtube.com/watch?v=<code>{id}</code></li>
-</ul>
-
-<hr>
-
-<p>📦 插件仓库地址：</p>
-<ul>
-  <li><a href="https://github.com/H4M5TER/koishi-plugin-youtube">【点我跳转 -> 上游仓库】https://github.com/H4M5TER/koishi-plugin-youtube</a></li>
-  <li><a href="https://github.com/VincentZyu233/koishi-plugin-youtubezyu-fork">【点我跳转 -> 本插件仓库】https://github.com/VincentZyu233/koishi-plugin-youtube-zyu-fork</a></li>
-</ul>
-
-<hr>
-
-<h2>🔧 使用方法</h2>
-<ol>
-  <li>
-    根据 Google 开发者文档创建一个应用并启用 YouTube Data API v3，获取你的 API Key。<br>
-    <a href="https://developers.google.com/youtube/v3/getting-started" target="_blank">
-      【点我跳转 -> YouTube Data API Overview | Google Developers】https://developers.google.com/youtube/v3/getting-started
-    </a>
-  </li>
-  <br>
-  <li>在 Koishi 后台插件配置中填写 API Key 并启用本插件。</li>
-  <br>
-  <li>保存配置后，插件将自动工作。</li>
-</ol>
-
-<hr>
-
-<h2>💡 提示</h2>
-<ul>
-  <li>确保网络环境能访问 YouTube API，否则无法获取视频信息。</li>
-  <li>API Key 有每日调用配额，请妥善管理。</li>
-</ul>
-
-<hr>
-
-<h3>插件许可声明</h3>
-<p>本插件为开源免费项目，基于 MIT 协议开放。欢迎修改、分发与二次开发。</p>
-`
-
-// REST 客户端函数
 async function callRestService(ctx: Context, config: Config, url: string, endpoint: string) {
   const targetUrl = `${config.restClientTargetUrl}/${endpoint}`;
   const payload = { url };
@@ -101,21 +56,95 @@ async function callRestService(ctx: Context, config: Config, url: string, endpoi
       return response.data;
     }
   } catch (error) {
-    ctx.logger.error(`REST 客户端调用失败: ${targetUrl}`, error);
+    ctx.logger.error(`❌ REST 客户端调用失败: ${targetUrl}`, error);
     throw error;
+  }
+}
+
+// ===== 🔁 REST 数据转换：把远端 parse 的 base64 缩略图还原成统一 payload =====
+
+function normalizeRestPayload(parseResult: YoutubeVideoPayload & { coverThumlnail: string }): YoutubeVideoPayload {
+  const thumbnailBuffer = Buffer.from(parseResult.coverThumlnail, 'base64');
+  return {
+    ...parseResult,
+    coverThumlnail: thumbnailBuffer.buffer.slice(thumbnailBuffer.byteOffset, thumbnailBuffer.byteOffset + thumbnailBuffer.byteLength),
+  };
+}
+
+// ===== 🧹 消息形式标准化：兼容数组、单值和异常配置 =====
+
+function normalizeMsgForms(config: Config) {
+  const rawMsgForms = Array.isArray(config.msgFormArr)
+    ? config.msgFormArr
+    : [config.msgFormArr].filter(Boolean);
+
+  return rawMsgForms.map((form) => {
+    const normalized = String(form).trim();
+    // 🧩 兼容旧配置：曾经的 image-with-text 现在统一叫 text-with-image。
+    if (normalized === LEGACY_MSG_FORM.IMAGE_WITH_TEXT) return MSG_FORM.TEXT_WITH_IMAGE;
+    return normalized;
+  });
+}
+
+// ===== 🔎 消息形式检测日志：明确每个模式为什么发送或跳过 =====
+
+function shouldSendMode(
+  logger: ReturnType<Context['logger']>,
+  msgForms: string[],
+  mode: string,
+  payloadReady = true,
+) {
+  const selected = msgForms.includes(mode);
+  if (!selected) {
+    logger.info(`⏭️ 跳过 YouTube 解析结果发送模式: ${mode}，原因: msgFormArr 未选择该模式`);
+    return false;
+  }
+
+  if (!payloadReady) {
+    logger.warn(`⚠️ 跳过 YouTube 解析结果发送模式: ${mode}，原因: payload 尚未准备好`);
+    return false;
+  }
+
+  logger.info(`🎯 命中 YouTube 解析结果发送模式: ${mode}`);
+  return true;
+}
+
+// ===== 📤 消息发送保护：单个模式失败时不影响其他模式继续发送 =====
+
+async function sendWithModeGuard(
+  logger: ReturnType<Context['logger']>,
+  mode: string,
+  send: () => Promise<unknown>,
+) {
+  try {
+    logger.info(`📤 开始发送 YouTube 解析结果: ${mode}`);
+    await send();
+    logger.info(`✅ 发送 YouTube 解析结果完成: ${mode}`);
+  } catch (error) {
+    logger.error(`❌ 发送 YouTube 解析结果失败: ${mode}`, error);
   }
 }
 
 export function apply(ctx: Context, config: Config) {
   const logger = ctx.logger(`${PLUGIN_NAME}-${config.enableParseUrlFromPlatformSession ? '启用解析消息url' : '禁用解析消息url'}`);
-  startRestService(ctx, config);
 
+  // 🔤 启动时先预检查字体；真正渲染时还会再次检查，避免字体被手动删除。
+  ensureCustomFont(ctx, config).catch((error) => {
+    ctx.logger.warn(`⚠️ [${PLUGIN_NAME}] 渲染字体预检查失败: ${error?.message || error}`);
+  });
+
+  // 🖥️ REST 服务依赖 Puppeteer，必须放进 ctx.inject()，这样服务热重载时能自动回收。
+  ctx.inject(['puppeteer'], (ctx) => {
+    startRestService(ctx, config);
+  });
+
+  // 👂 主中间件：监听聊天消息里的 YouTube 链接。
   ctx.middleware(async (session, next) => {
     const isYoutube = session.content.includes('youtube.com') || session.content.includes('https://youtu.be')
     if (!isYoutube) return next()
 
     if (!config.enableParseUrlFromPlatformSession) {
-      logger.info("URL解析功能已禁用，跳过处理。");
+      logger.info("⏸️ URL解析功能已禁用，跳过处理。");
       return next();
     }
 
@@ -142,65 +171,98 @@ export function apply(ctx: Context, config: Config) {
     }
 
     try {
+      const msgForms = normalizeMsgForms(config);
+      logger.info(`🧾 msgFormArr 原始值 = ${JSON.stringify(config.msgFormArr)}`);
+      logger.info(`🧹 msgFormArr 标准化后 = ${JSON.stringify(msgForms)}`);
+      logger.info(`⚙️ 当前工作模式 middlewareWorkMode = ${config.middlewareWorkMode}`);
+      logger.info(`💬 当前发送引用 quoteWhenSend = ${config.quoteWhenSend}`);
+
       if (config.middlewareWorkMode === 'rest_client') {
         // REST 客户端模式：调用远程服务
-        logger.info(`REST 客户端模式：调用远程服务 ${config.restClientTargetUrl}`);
+        logger.info(`🔌 REST 客户端模式：调用远程服务 ${config.restClientTargetUrl}`);
 
-        // 如果需要文本模式，先调用 parse 获取视频信息
-        if (config.msgFormArr.includes(MSG_FORM.TEXT)) {
+        let payload: YoutubeVideoPayload | undefined;
+        const needParsedPayload = msgForms.some((form) =>
+          form === MSG_FORM.TEXT
+          || form === MSG_FORM.TEXT_WITH_IMAGE
+          || form === MSG_FORM.FORWARD
+        );
+        logger.info(`🔎 REST 客户端模式是否需要先调用 /parse: ${needParsedPayload}`);
+
+        if (needParsedPayload) {
+          logger.info('📡 REST 客户端模式开始调用 /parse 获取文本/图文/合并转发 payload');
           const parseResult = await callRestService(ctx, config, session.content, 'parse');
-          
-          // 将 base64 图片数据转换为 ArrayBuffer 用于显示
-          const thumbnailBuffer = Buffer.from(parseResult.coverThumlnail, 'base64');
-          
-          let textMsgArr = [
-            h.image(thumbnailBuffer, parseResult.coverMime),
-            h.text(`标题：\t${parseResult.titleText}`),
-            h.text(`频道：\t${parseResult.channelText}`),
-            h.text(`时间：\t${parseResult.publishTimeText}`),
-            h.text(`播放量：\t${parseResult.viewCountText}`),
-            h.text(`简介：\t${parseResult.descriptionText}`),
-            h.text(`标签：\t${parseResult.tagText}`)
-          ];
-          const textMsg = textMsgArr.join('\n');
-          await session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${textMsg}`);
+          payload = normalizeRestPayload(parseResult);
+          logger.info(`✅ REST 客户端模式 /parse 完成，payload 标题 = ${payload.titleText}`);
         }
 
-        // 如果需要图片模式，调用 render-from-url
-        if (config.msgFormArr.includes(MSG_FORM.IMAGE)) {
-          const renderResult = await callRestService(ctx, config, session.content, 'render-from-url');
-          await session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${h.image(`data:image/png;base64,${renderResult.imageBase64}`)}`);
+        // 📄 纯文本模式：只发送文字字段，不发送缩略图。
+        if (shouldSendMode(logger, msgForms, MSG_FORM.TEXT, !!payload)) {
+          await sendWithModeGuard(logger, MSG_FORM.TEXT, () =>
+            session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${formatYoutubeVideoText(payload)}`)
+          );
         }
 
-        if (config.msgFormArr.includes(MSG_FORM.FORWARD)){
-          // TODO: 实现合并转发逻辑
+        // 🖼️➕📄 图文模式：保留旧版 text 的“缩略图 + 文本详情”效果。
+        if (shouldSendMode(logger, msgForms, MSG_FORM.TEXT_WITH_IMAGE, !!payload)) {
+          await sendWithModeGuard(logger, MSG_FORM.TEXT_WITH_IMAGE, () =>
+            session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${formatYoutubeVideoTextWithImage(payload)}`)
+          );
+        }
+
+        // 🖼️ 图片模式：让远端直接 parse + render，当前实例只负责发送图片。
+        if (shouldSendMode(logger, msgForms, MSG_FORM.IMAGE)) {
+          await sendWithModeGuard(logger, MSG_FORM.IMAGE, async () => {
+            logger.info('🖼️ REST 客户端模式开始调用 /render-from-url 获取图片');
+            const renderResult = await callRestService(ctx, config, session.content, 'render-from-url');
+            logger.info(`✅ REST 客户端模式 /render-from-url 完成，imageBase64 长度 = ${String(renderResult.imageBase64 || '').length}`);
+            await session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${h.image(`data:image/png;base64,${renderResult.imageBase64}`)}`);
+          });
+        }
+
+        // 📦 合并转发模式：目前主要面向 OneBot，其他平台是否支持取决于适配器。
+        if (shouldSendMode(logger, msgForms, MSG_FORM.FORWARD, !!payload)){
+          await sendWithModeGuard(logger, MSG_FORM.FORWARD, () => {
+            const forwardMessage = formatYoutubeVideoForward(payload, session.bot);
+            logger.info(`📦 合并转发消息 XML 长度 = ${forwardMessage.length}`);
+            return session.send(h.unescape(forwardMessage));
+          });
         }
 
       } else {
-        // 独立模式：使用本地解析函数（原有逻辑）
+        // 🏠 独立模式：当前实例自己请求 YouTube API、下载缩略图、渲染图片。
+        logger.info('🏠 独立模式开始解析 YouTube 视频 payload');
         const payload = await parseYoutubeVideo(ctx, config, session.content);
+        logger.info(`✅ 独立模式解析完成，payload 标题 = ${payload.titleText}`);
+        logger.info(`🖼️ 独立模式 payload 封面 MIME = ${payload.coverMime}`);
+        logger.info(`📏 独立模式 payload 封面字节数 = ${Buffer.from(payload.coverThumlnail).length}`);
 
-        if (config.msgFormArr.includes(MSG_FORM.TEXT)) {
-          let textMsgArr = [
-            h.image(payload.coverThumlnail, payload.coverMime),
-            h.text(`标题：\t${payload.titleText}`),
-            h.text(`频道：\t${payload.channelText}`),
-            h.text(`发布时间：\t${payload.publishTimeText}`),
-            h.text(`播放量：\t${payload.viewCountText}`),
-            h.text(`简介：\t${payload.descriptionText}`),
-            h.text(`标签：\t${payload.tagText}`)
-          ];
-          const textMsg = textMsgArr.join('\n');
-          await session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${textMsg}`);
+        if (shouldSendMode(logger, msgForms, MSG_FORM.TEXT)) {
+          await sendWithModeGuard(logger, MSG_FORM.TEXT, () =>
+            session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${formatYoutubeVideoText(payload)}`)
+          );
         }
 
-        if (config.msgFormArr.includes(MSG_FORM.IMAGE)) {
-          const imageBase64 = await renderYoutubeVideoImage(ctx, payload);
-          await session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${h.image(`data:image/png;base64,${imageBase64}`)}`);
+        if (shouldSendMode(logger, msgForms, MSG_FORM.TEXT_WITH_IMAGE)) {
+          await sendWithModeGuard(logger, MSG_FORM.TEXT_WITH_IMAGE, () =>
+            session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${formatYoutubeVideoTextWithImage(payload)}`)
+          );
         }
 
-        if (config.msgFormArr.includes(MSG_FORM.FORWARD)){
-          // TODO: 实现合并转发逻辑
+        if (shouldSendMode(logger, msgForms, MSG_FORM.IMAGE)) {
+          await sendWithModeGuard(logger, MSG_FORM.IMAGE, async () => {
+            const imageBase64 = await renderYoutubeVideoImage(ctx, payload, config);
+            logger.info(`✅ 独立模式图片渲染完成，imageBase64 长度 = ${String(imageBase64 || '').length}`);
+            await session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${h.image(`data:image/png;base64,${imageBase64}`)}`);
+          });
+        }
+
+        if (shouldSendMode(logger, msgForms, MSG_FORM.FORWARD)){
+          await sendWithModeGuard(logger, MSG_FORM.FORWARD, () => {
+            const forwardMessage = formatYoutubeVideoForward(payload, session.bot);
+            logger.info(`📦 合并转发消息 XML 长度 = ${forwardMessage.length}`);
+            return session.send(h.unescape(forwardMessage));
+          });
         }
       }
 
@@ -211,10 +273,10 @@ export function apply(ctx: Context, config: Config) {
         ? 'REST客户端模式'
         : '独立模式';
       
-      // 构建简要错误信息
+      // 🧯 构建简要错误信息，默认只发用户能看懂的部分。
       let briefErrorMsg = `⚠️ YouTube视频解析失败 (${workModeText})`;
       
-      // 根据错误类型生成简要提示
+      // 🧭 根据错误类型生成更明确的提示，方便快速定位 API / 网络 / 视频状态问题。
       if (error.statusCode === 400) {
         briefErrorMsg += '\n❌ API请求参数错误 (400)，请检查API Key是否有效';
       } else if (error.statusCode === 403) {
@@ -229,7 +291,7 @@ export function apply(ctx: Context, config: Config) {
         briefErrorMsg += `\n❌ ${error.message || '未知错误'}`;
       }
       
-      // 构建详细错误信息
+      // 🔎 构建详细错误信息；只有开启 verboseSession 才发到聊天里。
       let detailedErrorMsg = briefErrorMsg;
       if (config.enableVerboseSessionOutput) {
         detailedErrorMsg += '\n\n📋 详细调试信息:';
@@ -255,15 +317,15 @@ export function apply(ctx: Context, config: Config) {
         }
       }
       
-      // 发送到聊天平台
+      // 📤 发送到聊天平台。
       await session.send(`${h.quote(session.messageId)}${config.enableVerboseSessionOutput ? detailedErrorMsg : briefErrorMsg}`);
       
-      // 输出到控制台日志
-      logger.error(`YouTube视频解析失败 (${workModeText})`);
+      // 🖥️ 输出到控制台日志；详细堆栈只在 verboseConsole 下输出。
+      logger.error(`❌ YouTube视频解析失败 (${workModeText})`);
       if (config.enableVerboseConsoleOutput) {
-        logger.error(`[详细错误] ${error.message}`);
+        logger.error(`🧪 [详细错误] ${error.message}`);
         if (error.stack) {
-          logger.error(`[错误堆栈] ${error.stack}`);
+          logger.error(`📚 [错误堆栈] ${error.stack}`);
         }
       }
     }

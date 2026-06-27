@@ -1,7 +1,13 @@
-// config.ts
-import { z } from 'koishi'
+// ================================
+// ⚙️ 插件配置入口：类型、枚举、Schema 都放这里
+// ================================
 
-// ==================== 📦 常量定义 ====================
+import { z } from 'koishi'
+import { DEFAULT_CONFIG_FONT_PATH, DEFAULT_FONT_DOWNLOAD_URL } from './utils'
+
+// ====================
+// 📦 常量定义
+// ====================
 
 /** 🌐 网络请求库类型 */
 export const REQUEST_LIB = {
@@ -14,8 +20,13 @@ export type RequestLibType = typeof REQUEST_LIB[keyof typeof REQUEST_LIB];
 export const MSG_FORM = {
   TEXT: 'text',
   IMAGE: 'image',
+  TEXT_WITH_IMAGE: 'text-with-image',
   FORWARD: 'forward',
 } as const;
+export const LEGACY_MSG_FORM = {
+  IMAGE_WITH_TEXT: 'image-with-text',
+} as const;
+export type MsgFormType = typeof MSG_FORM[keyof typeof MSG_FORM];
 
 /** 🔒 代理协议类型 */
 export const PROXY_PROTOCOL = {
@@ -27,52 +38,82 @@ export const PROXY_PROTOCOL = {
 } as const;
 export type ProxyProtocolType = typeof PROXY_PROTOCOL[keyof typeof PROXY_PROTOCOL];
 
-// ==================== 📋 配置接口定义 ====================
+// ====================
+// 📋 配置接口定义
+// ====================
 
 export interface Config {
-  // 🔑 基础配置
+  // ==================
+  // 🔑 基础配置字段
+  // ==================
   youtubeApiKey: string,
   enableParseUrlFromPlatformSession: boolean,
   middlewareWorkMode: 'standalone' | 'rest_client';
   restClientTargetUrl: string;
 
-  // 🌐 网络请求配置
+  // ==================
+  // 🖥️ REST 服务配置字段
+  // ==================
+  enableRestfulService: boolean
+  restServiceBindIp: string
+  restServiceBindPort: number
+
+  // ==================
+  // 🌐 网络请求配置字段
+  // ==================
   requestLib: RequestLibType;
   proxyProtocol: ProxyProtocolType;
   proxyIp: string;
   proxyPort: number;
   userAgent: string;
 
-  // 📝 视频简介配置
+  // ==================
+  // 📝 视频简介配置字段
+  // ==================
   hideDescription: boolean,
   maxDescriptionLength: number,
 
-  // 💬 消息发送配置
+  // ==================
+  // 💬 消息发送配置字段
+  // ==================
   msgFormArr: Array<string>,
   quoteWhenSend: boolean,
 
-  // 🛡️ 平台白名单配置
+  // ==================
+  // 🔤 字体工具配置字段
+  // ==================
+  enableCustomFont: boolean,
+  autoDownloadFont: boolean,
+  customFontPath: string,
+  fontDownloadUrl: string,
+
+  // ==================
+  // 🛡️ 平台白名单配置字段
+  // ==================
   platformWhitelistArr: {
     platformName: string,
     userIdWhilelist: Array<string>,
   }[]
   sendWhiteListHint: boolean;
 
-  // 🖥️ REST 服务配置
-  enableRestfulService: boolean
-  restServiceBindIp: string
-  restServiceBindPort: number
-
-  // 🐛 调试配置
+  // ==================
+  // 🐛 调试配置字段
+  // ==================
   enableVerboseSessionOutput: boolean,
   enableVerboseConsoleOutput: boolean,
 }
 
-// ==================== ⚙️ 配置 Schema 定义 ====================
+// ====================
+// ⚙️ 配置 Schema 定义
+// ====================
 
 export const Config: z<Config> = z.intersect([
+  // ==================
+  // 🔧 基础配置分组
+  // ==================
   z.object({
     youtubeApiKey: z.string()
+      .role('secret')
       .required()
       .description("🔑 (必填) 请在此填写你的 YouTube API Key → → → → →"),
     enableParseUrlFromPlatformSession: z.boolean()
@@ -89,6 +130,25 @@ export const Config: z<Config> = z.intersect([
   })
     .description("🔧 基础配置"),
 
+  // ==================
+  // 🖥️ REST 服务配置分组
+  // ==================
+  z.object({
+    enableRestfulService: z.boolean()
+      .default(false)
+      .description("🖥️ 是否启用 RESTful 服务 (为外界提供图片渲染)"),
+    restServiceBindIp: z.string()
+      .default("0.0.0.0")
+      .description("🏠 RESTful 服务绑定的 IP 地址"),
+    restServiceBindPort: z.number()
+      .min(1024).max(65535).step(1)
+      .default(18020)
+      .description("🚪 RESTful 服务绑定的端口"),
+  }).description("🖥️ REST 服务配置"),
+
+  // ==================
+  // 🌐 网络请求 & 代理配置分组
+  // ==================
   z.object({
     requestLib: z.union([
       z.const(REQUEST_LIB.CTX_HTTP).description("📡 使用 Koishi 提供的 ctx.http 进行网络请求"),
@@ -122,6 +182,9 @@ export const Config: z<Config> = z.intersect([
   })
     .description("🌐 网络请求 & 代理配置"),
 
+  // ==================
+  // 📝 视频简介配置分组
+  // ==================
   z.object({
     hideDescription: z.boolean()
       .description("🙈 是否隐藏视频简介").default(false),
@@ -131,28 +194,59 @@ export const Config: z<Config> = z.intersect([
   })
     .description("📝 视频简介配置"),
 
+  // ==================
+  // 💬 消息发送形式配置分组
+  // ==================
   z.object({
     msgFormArr: z.array(
-      // z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE, MSG_FORM.FORWARD])
-      z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE])
+      z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE, MSG_FORM.TEXT_WITH_IMAGE, MSG_FORM.FORWARD])
     )
-      .default([MSG_FORM.TEXT])
+      .default([MSG_FORM.TEXT_WITH_IMAGE, MSG_FORM.IMAGE, MSG_FORM.FORWARD])
       .role("checkbox")
-      .description("📤 消息发送形式：text=文本 📄, image=图片 🖼️, forward=合并转发 📦 (仅onebot) <br/> <i>*todo: 实现 forward*</i>"),
+      .description([
+        '📤 选择解析结果的发送形式',
+        '📄 纯文本：只发送标题、频道、时间、播放量、简介和标签',
+        '🖼️ 图片：只发送 Puppeteer 渲染的视频预览卡片',
+        '📄➕🖼️ text-with-image：发送缩略图 + 文本详情，等价于旧版 text 行为',
+        '📦 合并转发：发送 OneBot 合并转发消息',
+      ].join('<br/>')),
     quoteWhenSend: z.boolean()
       .default(true)
       .description("💬 发送消息时是否带有引用")
   })
     .description("💬 消息发送形式配置"),
 
+  // ==================
+  // 🔤 Puppeteer 图片字体配置分组
+  // ==================
+  z.object({
+    enableCustomFont: z.boolean()
+      .default(true)
+      .description("🔤 是否启用自定义渲染字体"),
+    autoDownloadFont: z.boolean()
+      .default(true)
+      .description("📥 字体文件不存在时是否自动下载到 Koishi 数据目录"),
+    customFontPath: z.string()
+      .role('textarea', { rows: [2, 5] })
+      .default(DEFAULT_CONFIG_FONT_PATH)
+      .description("📁 自定义字体绝对路径。默认使用 Koishi 数据目录 data/fonts 下的字体文件；留空或路径错误则回退系统字体"),
+    fontDownloadUrl: z.string()
+      .role('link')
+      .default(DEFAULT_FONT_DOWNLOAD_URL)
+      .description("🌐 自动下载字体的 URL，默认使用 LXGWWenKaiMono-Regular.ttf")
+  })
+    .description("🔤 Puppeteer 图片字体配置"),
+
+  // ==================
+  // 🛡️ 平台白名单配置分组
+  // ==================
   z.object({
     platformWhitelistArr: z.array(
       z.object({
         platformName: z.string()
-          .required()
           .description('🏷️ 平台名称'),
         userIdWhilelist: z.array(
-          z.string().required().description('👤 白名单用户 ID')
+          z.string().description('👤 白名单用户 ID')
         )
           .role('table')
           .description('📋 白名单用户 ID 列表')
@@ -172,19 +266,9 @@ export const Config: z<Config> = z.intersect([
   })
     .description("🛡️ 平台白名单配置"),
 
-  z.object({
-    enableRestfulService: z.boolean()
-      .default(false)
-      .description("🖥️ 是否启用 RESTful 服务 (为外界提供图片渲染)"),
-    restServiceBindIp: z.string()
-      .default("0.0.0.0")
-      .description("🏠 RESTful 服务绑定的 IP 地址"),
-    restServiceBindPort: z.number()
-      .min(1024).max(65535).step(1)
-      .default(18020)
-      .description("🚪 RESTful 服务绑定的端口"),
-  }).description("🖥️ REST 服务配置"),
-
+  // ==================
+  // 🐛 调试配置分组
+  // ==================
   z.object({
     enableVerboseSessionOutput: z.boolean()
       .default(false)
