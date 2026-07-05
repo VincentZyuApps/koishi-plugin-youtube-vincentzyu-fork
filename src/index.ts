@@ -5,7 +5,7 @@ import axios from 'axios'
 
 import { startRestService } from './rest';
 import { parseYoutubeVideo, extractYoutubeId } from './parse';
-import { ensureCustomFont } from './utils';
+import { ensureCustomFont } from './utils/fonts';
 import { renderYoutubeVideoImage, type YoutubeVideoPayload } from './templates/image';
 import { formatYoutubeVideoText } from './templates/text';
 import { formatYoutubeVideoTextWithImage } from './templates/text-with-image';

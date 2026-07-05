@@ -11,15 +11,18 @@
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork)
 [![Gitee](https://img.shields.io/badge/Gitee-C71D23?style=for-the-badge&logo=gitee&logoColor=white)](https://gitee.com/vincent-zyu/koishi-plugin-youtube-vincentzyu-fork)
 
-[![Koishi Forum](https://img.shields.io/badge/forum.koishi.xyz_topic_11779-5546A3?style=for-the-badge&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAABU0lEQVR42p2UQSsFYRSGnxnqLuytKWKpKFkQNsS%2FsOHPWPADLCmxU5S7UzYWNrJR7lYiRF2FeWzOMKZ7mXHqNNP5vvP2nu%2B850CY2lP4X1K31ZbaDm%2BpO%2Bpyp5wfAXVEPfRvO1JHf4AVQGbUh7j4EZ4VkrNCXPVRnf3CUBN1SH2KC28VGOV3ntRhNclZHdcAKYM11QR1oVBOXctzFlNgBTC8qmXxPQEegbVeYApIgJT6tg%2F0AdMp0B%2FBpCabK2AAmAAa%2F2GRBft1oBFPkqTAba7LCiAfQC9wClwAY1HJHepuiO29Yrsf1Dn1uiDU3RTYCtTkl1Leg8k9MB4NGgReI28rV3azgyCz0og01Xl1Uz1QX8uCTELm3UbkTF1VJ9Wr0tn3iBSGdjYG0XivE3VN3VD31PM4a3cc2tIGGI0VkTO7rLxGuiy25ejmjfqsvkSXui62TxaK03td4FXTAAAAAElFTkSuQmCC&logoColor=white)](https://forum.koishi.xyz/t/topic/11779)
-[![QQ群](https://img.shields.io/badge/QQ群-1085190201-12B7F5?style=flat-square&logo=qq&logoColor=white)](https://qm.qq.com/q/4vjto4V7Di)
+[![Koishi Forum](https://img.shields.io/badge/Koishi%20Forum-11779-5546A3?style=for-the-badge&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAABU0lEQVR42p2UQSsFYRSGnxnqLuytKWKpKFkQNsS%2FsOHPWPADLCmxU5S7UzYWNrJR7lYiRF2FeWzOMKZ7mXHqNNP5vvP2nu%2B850CY2lP4X1K31ZbaDm%2BpO%2Bpyp5wfAXVEPfRvO1JHf4AVQGbUh7j4EZ4VkrNCXPVRnf3CUBN1SH2KC28VGOV3ntRhNclZHdcAKYM11QR1oVBOXctzFlNgBTC8qmXxPQEegbVeYApIgJT6tg%2F0AdMp0B%2FBpCabK2AAmAAa%2F2GRBft1oBFPkqTAba7LCiAfQC9wClwAY1HJHepuiO29Yrsf1Dn1uiDU3RTYCtTkl1Leg8k9MB4NGgReI28rV3azgyCz0og01Xl1Uz1QX8uCTELm3UbkTF1VJ9Wr0tn3iBSGdjYG0XivE3VN3VD31PM4a3cc2tIGGI0VkTO7rLxGuiy25ejmjfqsvkSXui62TxaK03td4FXTAAAAAElFTkSuQmCC&logoColor=white)](https://forum.koishi.xyz/t/topic/11779)
+[![QQ群](https://img.shields.io/badge/QQ群-1085190201-12B7F5?style=flat-square&logo=qq&logoColor=white)](https://qm.qq.com/q/ZN7fxZ3qCq)
 
-<p><del>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>259248174</b>   🎉（这个群G了</del> </p> 
+<h2>💬 交流反馈</h2>
+<p>🐛 Bug 反馈 / 💡 建议 / 👨‍💻 插件开发交流，欢迎加群：</p>
+<p><del>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>259248174</b>   🎉（这个群G了）</del></p> 
 <p>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>1085190201</b> 🎉</p>
 <p>💡 在群里直接艾特我，回复的更快哦~ ✨</p>
 
 
 > 📺 自动识别聊天中的 YouTube 链接，通过 YouTube Data API v3 获取视频信息，并返回文本或 Puppeteer 渲染图片。  
+
 > 🍴 forked from [H4M5TER/koishi-plugin-youtube](https://github.com/H4M5TER/koishi-plugin-youtube)
 
 ## ✨ 功能特性
@@ -168,7 +171,7 @@ https://www.youtube.com/embed/{video_id}
 | `enableCustomFont` | `boolean` | `true` | 是否启用自定义渲染字体 |
 | `autoDownloadFont` | `boolean` | `true` | 字体不存在时是否自动下载 |
 | `customFontPath` | `string` | `ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf` | 自定义字体绝对路径，默认使用 Koishi 数据目录下的字体文件 |
-| `fontDownloadUrl` | `string` | LXGW WenKai 下载地址 | 自动下载字体的 URL |
+| `fontDownloadUrl` | `string` | Gitee LXGW WenKai 下载地址 | 自动下载字体的 URL；保持默认值时会自动 fallback 到 GitHub |
 
 默认字体路径遵循 Koishi 数据目录规范：
 
@@ -179,11 +182,13 @@ ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf
 路径规则：
 
 - 📁 `customFontPath` 默认值：使用上面的默认路径，并允许自动下载。
-- 📁 `customFontPath` 留空：不使用自定义字体，直接回退系统字体。
+- 📁 `customFontPath` 留空：使用 `ctx.baseDir` 下的默认字体路径，并允许自动下载。
 - 📁 `customFontPath` 填绝对路径且文件存在：直接使用该字体。
 - 📁 `customFontPath` 填相对路径：不支持，直接回退系统字体。
 - 📁 `customFontPath` 填绝对路径但文件不存在：直接回退系统字体。
-- 📥 只有配置值等于默认路径、文件缺失且 `autoDownloadFont = true` 时，才会从 `fontDownloadUrl` 下载。
+- 📥 只有配置值为空或等于默认路径、文件缺失或 hash 校验失败且 `autoDownloadFont = true` 时，才会自动下载默认字体。
+- 📥 默认下载顺序为 Gitee release 优先，失败后 fallback 到 GitHub release；如果 `fontDownloadUrl` 改成自定义 URL，则只尝试该地址。
+- ✅ 默认字体下载完成后会校验 `size + md5 + sha1 + sha256 + sha512`，全部通过才会参与渲染。
 - 🔤 支持常见字体格式：`.ttf`、`.otf`、`.woff`、`.woff2`。
 
 ### 🛡️ 平台白名单配置

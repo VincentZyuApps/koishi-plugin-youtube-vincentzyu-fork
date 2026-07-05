@@ -39,14 +39,14 @@ export const usage = `
     <img src="https://img.shields.io/badge/Koishi%20Forum-11779-5546A3?style=for-the-badge&logo=${KOISHI_LOGO_BASE64}&logoColor=white" alt="Koishi Forum">
   </a>
   <a href="https://qm.qq.com/q/ZN7fxZ3qCq" target="_blank">
-    <img src="https://img.shields.io/badge/QQ群-1085190201-1AAD19?style=flat-square" alt="QQ群">
+    <img src="https://img.shields.io/badge/QQ群-1085190201-12B7F5?style=flat-square&logo=qq&logoColor=white" alt="QQ群">
   </a>
 </p>
 
 <h2>💬 交流反馈</h2>
 <p>🐛 Bug 反馈 / 💡 建议 / 👨‍💻 插件开发交流，欢迎加群：</p>
-<p><del>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>259248174</b>   🎉（这个群G了</del></p>
-<p>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>1085190201🎉</p>
+<p><del>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>259248174</b>   🎉（这个群G了）</del></p>
+<p>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>1085190201</b> 🎉</p>
 <p>💡 在群里直接艾特我，回复的更快哦~ ✨</p>
 
 <hr>
@@ -92,6 +92,7 @@ export const usage = `
   <li>📄➕🖼️ 兼容旧版图文：选择 <code>text-with-image</code>。</li>
   <li>📦 合并转发：选择 <code>forward</code>，主要面向 OneBot 适配器。</li>
   <li>🔤 自定义字体默认使用 <code>ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf</code>。</li>
+  <li>📥 默认字体下载优先使用 Gitee release，失败后自动 fallback 到 GitHub release，并在下载后校验 size、md5、sha1、sha256、sha512。</li>
 </ul>
 
 <hr>

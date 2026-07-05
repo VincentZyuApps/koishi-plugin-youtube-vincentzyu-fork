@@ -3,7 +3,7 @@
 // ================================
 
 import { z } from 'koishi'
-import { DEFAULT_CONFIG_FONT_PATH, DEFAULT_FONT_DOWNLOAD_URL } from './utils'
+import { DEFAULT_CONFIG_FONT_PATH, DEFAULT_FONT_DOWNLOAD_URL } from './utils/fonts'
 
 // ====================
 // 📦 常量定义
@@ -233,7 +233,7 @@ export const Config: z<Config> = z.intersect([
     fontDownloadUrl: z.string()
       .role('link')
       .default(DEFAULT_FONT_DOWNLOAD_URL)
-      .description("🌐 自动下载字体的 URL，默认使用 LXGWWenKaiMono-Regular.ttf")
+      .description("🌐 自动下载字体的 URL。使用默认值时优先从 Gitee 下载，失败后 fallback 到 GitHub；填写自定义 URL 时只尝试该地址")
   })
     .description("🔤 Puppeteer 图片字体配置"),
 

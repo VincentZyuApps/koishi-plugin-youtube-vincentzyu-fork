@@ -2,7 +2,7 @@ import { Context } from 'koishi';
 import { } from 'koishi-plugin-puppeteer';
 import { Buffer } from 'buffer';
 import type { Config } from '../config';
-import { getCustomFontFaceCss } from '../utils';
+import { getCustomFontFaceCss } from '../utils/fonts';
 
 // ===== 📦 图片模板：解析层传给 Puppeteer 的数据结构 =====
 
