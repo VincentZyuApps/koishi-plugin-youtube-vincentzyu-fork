@@ -3,15 +3,15 @@ import type { YoutubeVideoPayload } from './image';
 import { formatYoutubeVideoText } from './text';
 
 // ================================
-// 📄➕🖼️ 图文模板：文本详情在前，缩略图在后
+// 🖼️➕📄 图文模板：缩略图在前，文本详情在后
 // ================================
 
-export function formatYoutubeVideoTextWithImage(payload: YoutubeVideoPayload) {
+export function formatYoutubeVideoImageWithText(payload: YoutubeVideoPayload) {
   // 🧱 Koishi 的 h.image() 对 Buffer 更稳；ArrayBuffer 在部分适配器里可能被吞。
   const coverBuffer = Buffer.from(payload.coverThumlnail);
 
   return [
-    formatYoutubeVideoText(payload),
     h.image(coverBuffer, payload.coverMime),
+    formatYoutubeVideoText(payload),
   ].join('\n');
 }

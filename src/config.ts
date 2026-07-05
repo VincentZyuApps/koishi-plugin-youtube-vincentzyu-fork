@@ -20,11 +20,12 @@ export type RequestLibType = typeof REQUEST_LIB[keyof typeof REQUEST_LIB];
 export const MSG_FORM = {
   TEXT: 'text',
   IMAGE: 'image',
+  IMAGE_WITH_TEXT: 'image-with-text',
   TEXT_WITH_IMAGE: 'text-with-image',
   FORWARD: 'forward',
 } as const;
 export const LEGACY_MSG_FORM = {
-  IMAGE_WITH_TEXT: 'image-with-text',
+  IMAGE_WITH_TEXT: MSG_FORM.IMAGE_WITH_TEXT,
 } as const;
 export type MsgFormType = typeof MSG_FORM[keyof typeof MSG_FORM];
 
@@ -80,8 +81,9 @@ export interface Config {
   quoteWhenSend: boolean,
 
   // ==================
-  // 🔤 字体工具配置字段
+  // 🎨 Puppeteer 渲染设置字段
   // ==================
+  renderImageWidth: number,
   enableCustomFont: boolean,
   autoDownloadFont: boolean,
   customFontPath: string,
@@ -199,15 +201,16 @@ export const Config: z<Config> = z.intersect([
   // ==================
   z.object({
     msgFormArr: z.array(
-      z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE, MSG_FORM.TEXT_WITH_IMAGE, MSG_FORM.FORWARD])
+      z.union([MSG_FORM.TEXT, MSG_FORM.IMAGE, MSG_FORM.IMAGE_WITH_TEXT, MSG_FORM.TEXT_WITH_IMAGE, MSG_FORM.FORWARD])
     )
-      .default([MSG_FORM.TEXT_WITH_IMAGE, MSG_FORM.IMAGE, MSG_FORM.FORWARD])
+      .default([MSG_FORM.IMAGE_WITH_TEXT, MSG_FORM.IMAGE, MSG_FORM.FORWARD])
       .role("checkbox")
       .description([
         '📤 选择解析结果的发送形式',
         '📄 纯文本：只发送标题、频道、时间、播放量、简介和标签',
         '🖼️ 图片：只发送 Puppeteer 渲染的视频预览卡片',
-        '📄➕🖼️ text-with-image：发送缩略图 + 文本详情，等价于旧版 text 行为',
+        '🖼️➕📄 image-with-text：发送缩略图 + 文本详情，等价于旧版图文行为',
+        '📄➕🖼️ text-with-image：发送文本详情 + 缩略图',
         '📦 合并转发：发送 OneBot 合并转发消息',
       ].join('<br/>')),
     quoteWhenSend: z.boolean()
@@ -217,9 +220,15 @@ export const Config: z<Config> = z.intersect([
     .description("💬 消息发送形式配置"),
 
   // ==================
-  // 🔤 Puppeteer 图片字体配置分组
+  // 🎨 Puppeteer 渲染设置分组
   // ==================
   z.object({
+    renderImageWidth: z.number()
+      .min(320)
+      .max(960)
+      .step(5)
+      .default(555)
+      .description("🖼️ Puppeteer 预览图输出宽度(px)，影响渲染卡片和截图宽度"),
     enableCustomFont: z.boolean()
       .default(true)
       .description("🔤 是否启用自定义渲染字体"),
@@ -235,7 +244,7 @@ export const Config: z<Config> = z.intersect([
       .default(DEFAULT_FONT_DOWNLOAD_URL)
       .description("🌐 自动下载字体的 URL。使用默认值时优先从 Gitee 下载，失败后 fallback 到 GitHub；填写自定义 URL 时只尝试该地址")
   })
-    .description("🔤 Puppeteer 图片字体配置"),
+    .description("🎨 Puppeteer 渲染设置"),
 
   // ==================
   // 🛡️ 平台白名单配置分组

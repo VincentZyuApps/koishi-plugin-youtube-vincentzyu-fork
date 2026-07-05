@@ -8,6 +8,7 @@ import { parseYoutubeVideo, extractYoutubeId } from './parse';
 import { ensureCustomFont } from './utils/fonts';
 import { renderYoutubeVideoImage, type YoutubeVideoPayload } from './templates/image';
 import { formatYoutubeVideoText } from './templates/text';
+import { formatYoutubeVideoImageWithText } from './templates/image-with-text';
 import { formatYoutubeVideoTextWithImage } from './templates/text-with-image';
 import { formatYoutubeVideoForward } from './templates/forward';
 import { usage } from './usage';
@@ -25,7 +26,7 @@ export {
   type MsgFormType,
   type ProxyProtocolType,
 } from './config';
-import { Config, LEGACY_MSG_FORM, REQUEST_LIB, MSG_FORM } from './config';
+import { Config, REQUEST_LIB, MSG_FORM } from './config';
 
 export const inject = {
   // 🧩 http / puppeteer 都是可选服务：文本模式可不用 Puppeteer，axios 模式可不用 ctx.http。
@@ -80,8 +81,6 @@ function normalizeMsgForms(config: Config) {
 
   return rawMsgForms.map((form) => {
     const normalized = String(form).trim();
-    // 🧩 兼容旧配置：曾经的 image-with-text 现在统一叫 text-with-image。
-    if (normalized === LEGACY_MSG_FORM.IMAGE_WITH_TEXT) return MSG_FORM.TEXT_WITH_IMAGE;
     return normalized;
   });
 }
@@ -184,6 +183,7 @@ export function apply(ctx: Context, config: Config) {
         let payload: YoutubeVideoPayload | undefined;
         const needParsedPayload = msgForms.some((form) =>
           form === MSG_FORM.TEXT
+          || form === MSG_FORM.IMAGE_WITH_TEXT
           || form === MSG_FORM.TEXT_WITH_IMAGE
           || form === MSG_FORM.FORWARD
         );
@@ -203,7 +203,14 @@ export function apply(ctx: Context, config: Config) {
           );
         }
 
-        // 🖼️➕📄 图文模式：保留旧版 text 的“缩略图 + 文本详情”效果。
+        // 🖼️➕📄 图文模式：缩略图在前，文本详情在后。
+        if (shouldSendMode(logger, msgForms, MSG_FORM.IMAGE_WITH_TEXT, !!payload)) {
+          await sendWithModeGuard(logger, MSG_FORM.IMAGE_WITH_TEXT, () =>
+            session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${formatYoutubeVideoImageWithText(payload)}`)
+          );
+        }
+
+        // 📄➕🖼️ 图文模式：文本详情在前，缩略图在后。
         if (shouldSendMode(logger, msgForms, MSG_FORM.TEXT_WITH_IMAGE, !!payload)) {
           await sendWithModeGuard(logger, MSG_FORM.TEXT_WITH_IMAGE, () =>
             session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${formatYoutubeVideoTextWithImage(payload)}`)
@@ -240,6 +247,12 @@ export function apply(ctx: Context, config: Config) {
         if (shouldSendMode(logger, msgForms, MSG_FORM.TEXT)) {
           await sendWithModeGuard(logger, MSG_FORM.TEXT, () =>
             session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${formatYoutubeVideoText(payload)}`)
+          );
+        }
+
+        if (shouldSendMode(logger, msgForms, MSG_FORM.IMAGE_WITH_TEXT)) {
+          await sendWithModeGuard(logger, MSG_FORM.IMAGE_WITH_TEXT, () =>
+            session.send(`${config.quoteWhenSend ? h.quote(session.messageId) : ''}${formatYoutubeVideoImageWithText(payload)}`)
           );
         }
 

@@ -57,7 +57,7 @@ export const usage = `
 <ul>
   <li>📄 <b>纯文本</b>：只发送视频字段信息。</li>
   <li>🖼️ <b>图片</b>：使用 Puppeteer 渲染 YouTube 风格预览卡片。</li>
-  <li>🖼️➕📄 <b>图文</b>：发送封面缩略图 + 文本详情。</li>
+  <li>🖼️➕📄 <b>图文</b>：支持封面缩略图在前或文本详情在前。</li>
   <li>📦 <b>合并转发</b>：发送 OneBot 合并转发消息。</li>
   <li>🖥️ <b>REST 模式</b>：支持拆分聊天客户端和远端渲染服务。</li>
 </ul>
@@ -89,8 +89,10 @@ export const usage = `
 <ul>
   <li>📄 只发纯文本：选择 <code>text</code>，不需要 Puppeteer。</li>
   <li>🖼️ 只发渲染图：选择 <code>image</code>，需要启用 Puppeteer。</li>
-  <li>📄➕🖼️ 兼容旧版图文：选择 <code>text-with-image</code>。</li>
+  <li>🖼️➕📄 图在前文在后：选择 <code>image-with-text</code>。</li>
+  <li>📄➕🖼️ 文在前图在后：选择 <code>text-with-image</code>。</li>
   <li>📦 合并转发：选择 <code>forward</code>，主要面向 OneBot 适配器。</li>
+  <li>🖼️ Puppeteer 预览图默认宽度为 <code>555px</code>，可在渲染设置中调整。</li>
   <li>🔤 自定义字体默认使用 <code>ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf</code>。</li>
   <li>📥 默认字体下载优先使用 Gitee release，失败后自动 fallback 到 GitHub release，并在下载后校验 size、md5、sha1、sha256、sha512。</li>
 </ul>

@@ -71,7 +71,7 @@
 - `youtubeApiKey`
 - `requestLib`
 - 代理配置，如果你的运行环境不能直连 YouTube / Google API
-- `msgFormArr`，选择发送纯文本、图片、text-with-image 图文或合并转发
+- `msgFormArr`，选择发送纯文本、图片、image-with-text / text-with-image 图文或合并转发
 
 ### 3. 发送链接测试 📺
 
@@ -154,20 +154,22 @@ https://www.youtube.com/embed/{video_id}
 
 | 配置项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `msgFormArr` | `array` | `["text-with-image", "image", "forward"]` | 发送形式，支持 `text`、`image`、`text-with-image`、`forward` |
+| `msgFormArr` | `array` | `["image-with-text", "image", "forward"]` | 发送形式，支持 `text`、`image`、`image-with-text`、`text-with-image`、`forward` |
 | `quoteWhenSend` | `boolean` | `true` | 回复时是否引用原消息 |
 
 发送形式说明：
 
 - `text`：只发送标题、频道、发布时间、播放量、简介和标签。
 - `image`：只发送 Puppeteer 渲染的视频预览卡片。
-- `text-with-image`：发送缩略图 + 文本详情，等价于旧版 `text` 行为。
+- `image-with-text`：发送缩略图 + 文本详情，等价于旧版图文行为。
+- `text-with-image`：发送文本详情 + 缩略图。
 - `forward`：发送 OneBot 合并转发消息。
 
-### 🔤 Puppeteer 图片字体配置
+### 🎨 Puppeteer 渲染设置
 
 | 配置项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `renderImageWidth` | `number` | `555` | Puppeteer 预览图输出宽度(px)，范围 `320-960`，步进 `5` |
 | `enableCustomFont` | `boolean` | `true` | 是否启用自定义渲染字体 |
 | `autoDownloadFont` | `boolean` | `true` | 字体不存在时是否自动下载 |
 | `customFontPath` | `string` | `ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf` | 自定义字体绝对路径，默认使用 Koishi 数据目录下的字体文件 |
@@ -234,14 +236,14 @@ ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf
 
 ### 发图片 🖼️
 
-- `msgFormArr = ["image"]` 或 `["text-with-image", "image"]`
+- `msgFormArr = ["image"]` 或 `["image-with-text", "image"]`
 - 启用 Puppeteer 插件
 - 确保 Koishi 运行环境可以启动浏览器
 - 默认会自动下载字体到 `ctx.baseDir/data/fonts`
 
 ### 默认组合 📦
 
-- `msgFormArr = ["text-with-image", "image", "forward"]`
+- `msgFormArr = ["image-with-text", "image", "forward"]`
 - 同时发送图文、渲染图和合并转发
 - `image` 需要启用 Puppeteer 插件
 - `forward` 主要面向 OneBot 适配器
