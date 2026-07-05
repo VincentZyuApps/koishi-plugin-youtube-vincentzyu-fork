@@ -69,7 +69,7 @@ const getTemplateStr = async (ctx: Context, payload: YoutubeVideoPayload, config
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                filter: blur(16px) brightness(0.82);
+                filter: blur(18px) brightness(0.67);
                 transform: scale(1.2);
             }
 
@@ -91,11 +91,11 @@ const getTemplateStr = async (ctx: Context, payload: YoutubeVideoPayload, config
                 overflow: hidden;
                 
                 /* 🧊 毛玻璃效果：让背景封面隐约透出来 */
-                background-color: rgba(40, 40, 40, 0.42);
-                backdrop-filter: blur(10px) saturate(180%);
-                -webkit-backdrop-filter: blur(10px) saturate(180%);
+                background-color: rgba(40, 40, 40, 0.40);
+                backdrop-filter: blur(10px) saturate(199%);
+                -webkit-backdrop-filter: blur(10px) saturate(199%);
                 
-                border: 1px solid rgba(255, 255, 255, 0.12);
+                border: 1px solid rgba(255, 255, 255, 0.13);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
                 display: flex;

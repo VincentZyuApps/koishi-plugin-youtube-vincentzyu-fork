@@ -40,9 +40,9 @@
 
 ## 🖼️ 预览
 
-![text_and_image](https://raw.githubusercontent.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork/master/doc/preview-images/text_and_image.png)
+![text_and_image](https://raw.githubusercontent.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork/master/doc/images/preview/text_and_image.png)
 
-![only_image](https://raw.githubusercontent.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork/master/doc/preview-images/only_image.png)
+![only_image](https://raw.githubusercontent.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork/master/doc/images/preview/only_image.png)
 
 ## 📦 依赖服务
 
@@ -128,7 +128,7 @@ https://www.youtube.com/embed/{video_id}
 | `youtubeApiKey` | `string` | 必填 | YouTube Data API v3 的 API Key |
 | `enableParseUrlFromPlatformSession` | `boolean` | `true` | 是否从聊天消息里自动解析 YouTube URL |
 | `middlewareWorkMode` | `standalone` / `rest_client` | `standalone` | 工作模式 |
-| `restClientTargetUrl` | `string` | `http://127.0.0.1:8020` | REST 客户端模式下的目标服务地址 |
+| `restClientTargetUrl` | `string` | `http://127.0.0.1:50820` | REST 客户端模式下的目标服务地址 |
 
 ### 🌐 网络请求与代理
 
@@ -217,7 +217,7 @@ ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf
 | --- | --- | --- | --- |
 | `enableRestfulService` | `boolean` | `false` | 是否启动 RESTful 服务 |
 | `restServiceBindIp` | `string` | `0.0.0.0` | REST 服务监听 IP |
-| `restServiceBindPort` | `number` | `18020` | REST 服务监听端口 |
+| `restServiceBindPort` | `number` | `60820` | REST 服务监听端口 |
 
 ### 🔎 调试配置
 
@@ -260,13 +260,13 @@ ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf
 
 - `enableRestfulService = true`
 - `restServiceBindIp = 0.0.0.0`
-- `restServiceBindPort = 18020`
+- `restServiceBindPort = 60820`
 - 启用 Puppeteer
 
 实例 A，聊天客户端：
 
 - `middlewareWorkMode = rest_client`
-- `restClientTargetUrl = http://实例B地址:18020`
+- `restClientTargetUrl = http://实例B地址:50820`
 
 ## 🧯 排错建议
 

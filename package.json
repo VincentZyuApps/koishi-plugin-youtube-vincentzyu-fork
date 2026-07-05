@@ -1,6 +1,6 @@
 {
   "name": "koishi-plugin-youtube-vincentzyu-fork",
-  "version": "2.1.3-beta.7+20260705",
+  "version": "2.1.3-beta.10+20260705",
   "description": "🎯 Koishi 插件 - 自动检测聊天中的 YouTube 链接，通过 YouTube Data API v3 获取视频信息 📊，支持文本发送 或 Puppeteer 渲染的预览信息图片 🖼️。支持独立模式/REST 分布式部署、SOCKS/HTTP 代理、平台白名单。 🎬 上游仓库：https://github.com/H4M5TER/koishi-plugin-youtube",
   "author": {
     "name": "VincentZyu",
@@ -39,8 +39,7 @@
   "files": [
     "lib",
     "dist",
-    "doc/preview-images/only_image.png",
-    "doc/preview-images/text_and_image.png"
+    "doc/images/preview"
   ],
   "keywords": [
     "chatbot",

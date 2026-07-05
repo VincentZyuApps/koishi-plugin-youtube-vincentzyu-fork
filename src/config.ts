@@ -49,12 +49,12 @@ export interface Config {
   // ==================
   youtubeApiKey: string,
   enableParseUrlFromPlatformSession: boolean,
-  middlewareWorkMode: 'standalone' | 'rest_client';
-  restClientTargetUrl: string;
 
   // ==================
   // 🖥️ REST 服务配置字段
   // ==================
+  middlewareWorkMode: 'standalone' | 'rest_client';
+  restClientTargetUrl: string;
   enableRestfulService: boolean
   restServiceBindIp: string
   restServiceBindPort: number
@@ -120,15 +120,7 @@ export const Config: z<Config> = z.intersect([
       .description("🔑 (必填) 请在此填写你的 YouTube API Key → → → → →"),
     enableParseUrlFromPlatformSession: z.boolean()
       .default(true)
-      .description("🔗 是否启用从平台聊天会话中解析 URL"),
-    middlewareWorkMode: z.union([
-      z.const('standalone').description("🏠 独立模式"),
-      z.const('rest_client').description("🔌 REST 客户端模式")
-    ]).default('standalone').role('radio')
-      .description("⚡ 工作模式"),
-    restClientTargetUrl: z.string()
-      .default("http://127.0.0.1:8020")
-      .description("🎯 REST 客户端模式下，目标服务器地址（实例B的地址）")
+      .description("🔗 是否启用从平台聊天会话中解析 URL")
   })
     .description("🔧 基础配置"),
 
@@ -136,6 +128,14 @@ export const Config: z<Config> = z.intersect([
   // 🖥️ REST 服务配置分组
   // ==================
   z.object({
+    middlewareWorkMode: z.union([
+      z.const('standalone').description("🏠 独立模式"),
+      z.const('rest_client').description("🔌 REST 客户端模式")
+    ]).default('standalone').role('radio')
+      .description("⚡ 工作模式"),
+    restClientTargetUrl: z.string()
+      .default("http://127.0.0.1:50820")
+      .description("🎯 REST 客户端模式下，目标服务器地址（实例B的地址）"),
     enableRestfulService: z.boolean()
       .default(false)
       .description("🖥️ 是否启用 RESTful 服务 (为外界提供图片渲染)"),
@@ -144,7 +144,7 @@ export const Config: z<Config> = z.intersect([
       .description("🏠 RESTful 服务绑定的 IP 地址"),
     restServiceBindPort: z.number()
       .min(1024).max(65535).step(1)
-      .default(18020)
+      .default(60820)
       .description("🚪 RESTful 服务绑定的端口"),
   }).description("🖥️ REST 服务配置"),
 
