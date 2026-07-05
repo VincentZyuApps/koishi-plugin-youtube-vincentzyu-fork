@@ -91,9 +91,9 @@ const getTemplateStr = async (ctx: Context, payload: YoutubeVideoPayload, config
                 overflow: hidden;
                 
                 /* 🧊 毛玻璃效果：让背景封面隐约透出来 */
-                background-color: rgba(40, 40, 40, 0.40);
-                backdrop-filter: blur(10px) saturate(199%);
-                -webkit-backdrop-filter: blur(10px) saturate(199%);
+                background-color: rgba(45, 45, 45, 0.45);
+                backdrop-filter: blur(13px) saturate(199%);
+                -webkit-backdrop-filter: blur(13px) saturate(199%);
                 
                 border: 1px solid rgba(255, 255, 255, 0.13);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -190,8 +190,8 @@ const getTemplateStr = async (ctx: Context, payload: YoutubeVideoPayload, config
             }
 
             .description {
-                font-size: 20px; /* 📝 简介字号 */
-                line-height: 1.36;
+                font-size: 13.333px; /* 📝 简介字号 */
+                line-height: 1.333;
                 color: #e0e0e0;
                 margin-top: 2px;
                 white-space: pre-wrap;

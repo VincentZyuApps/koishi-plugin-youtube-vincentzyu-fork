@@ -206,14 +206,14 @@ export async function parseYoutubeVideo(ctx: Context, config: Config, url: strin
   const mime = 'image/' + thumbnailUrl.slice(thumbnailUrl.lastIndexOf('.') + 1);
   const thumbnail = await downloadThumbnail(ctx, config, thumbnailUrl);
 
-  let tagString = '[NO TAGS]';
+  let tagString = '🏷️ --- [NO TAGS] ---';
   if (tags) {
     tagString = tags.length > 1 ? tags.join(', ') : tags[0];
   }
 
   let descriptionText = description;
   if (config.hideDescription) {
-    descriptionText = '[DESCRIPTION HAS BEEN HIDDEN.]';
+    descriptionText = '📝 --- [DESCRIPTION HAS BEEN HIDDEN.] ---';
   } else if (description && description.length > config.maxDescriptionLength) {
     descriptionText = description.slice(0, config.maxDescriptionLength);
     descriptionText += `...(${description.length - config.maxDescriptionLength}CHARACTERS HAS BEEN OMITEED.)`;
