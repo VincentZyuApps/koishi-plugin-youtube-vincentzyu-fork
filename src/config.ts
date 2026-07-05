@@ -92,11 +92,15 @@ export interface Config {
   // ==================
   // 🛡️ 平台白名单配置字段
   // ==================
-  platformWhitelistArr: {
+  enablePlatformWhitelist: boolean,
+  platformWhitelistPlatformArr: {
     platform: string,
+    enabled: boolean,
+  }[],
+  platformWhitelistUserArr: {
     userId: string,
     enabled: boolean,
-  }[]
+  }[],
   sendWhiteListHint: boolean;
 
   // ==================
@@ -251,10 +255,36 @@ export const Config: z<Config> = z.intersect([
   // 🛡️ 平台白名单配置分组
   // ==================
   z.object({
-    platformWhitelistArr: z.array(
+    enablePlatformWhitelist: z.boolean()
+      .default(false)
+      .description('🛡️ 是否启用白名单校验。关闭时所有平台、所有用户都会直接放行，不检查下面的平台表和用户表，也不会发送白名单校验结果提示。开启后，会先检查当前平台是否在「校验平台表」中启用；只有命中的平台才继续检查用户白名单。'),
+    platformWhitelistPlatformArr: z.array(
       z.object({
         platform: z.string()
           .description('🏷️ 平台名称'),
+        enabled: z.boolean()
+          .default(true)
+          .description('✅ 是否启用')
+      })
+    )
+      .role('table')
+      .default([
+        {
+          platform: 'onebot',
+          enabled: true
+        },
+        {
+          platform: 'kook',
+          enabled: true
+        },
+        {
+          platform: 'qq',
+          enabled: false
+        }
+      ])
+      .description('📋 需要进行白名单校验的平台列表。全局白名单开关开启后，只有当前 session.platform 命中本表中 enabled=true 的平台，才会继续检查用户白名单；未列入的平台，或 enabled=false 的平台，所有用户都会直接放行。默认对 onebot 和 kook 开启校验。'),
+    platformWhitelistUserArr: z.array(
+      z.object({
         userId: z.string()
           .description('👤 白名单用户 ID'),
         enabled: z.boolean()
@@ -265,15 +295,18 @@ export const Config: z<Config> = z.intersect([
       .role('table')
       .default([
         {
-          platform: 'onebot',
+          userId: '123456789',
+          enabled: true
+        },
+        {
           userId: '1830540513',
           enabled: true
         }
       ])
-      .description('⚠️ YouTube 有些内容不适合发到国内聊天平台 (如 onebot)，所以加了这个配置项 hhh。<br> 每行表示一个平台 + 用户 ID 白名单规则，可用最右边一列 `enabled` 进行临时停用。'),
+      .description('👤 白名单用户 ID 列表。仅在全局白名单开关开启，且当前平台命中上方「校验平台表」时生效；只有 session.userId 命中本表中 enabled=true 的用户才会继续解析，未命中则跳过。用户 ID 不区分平台，同一个 ID 规则会作用于所有需要校验的平台。'),
     sendWhiteListHint: z.boolean()
       .default(false)
-      .description('💡 是否发送白名单校验结果提示 <br/> ✅ 白名单用户，开始解析链接... <br/> ❌ 非白名单用户，已跳过解析。')
+      .description('💡 是否发送白名单校验结果提示 <br/> <strong><em>✅ 白名单用户，开始解析链接...</em></strong> <br/> <strong><em>❌ 非白名单用户，已跳过解析。</em></strong><br>仅在全局白名单开关开启，且当前平台确实命中「校验平台表」时才可能发送；这个开关只控制提示消息，不影响白名单校验是否生效。')
   })
     .description("🛡️ 平台白名单配置"),
 

@@ -1,4 +1,6 @@
-![koishi-plugin-youtube-vincentzyu-fork](https://socialify.git.ci/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork/image?custom_description=%F0%9F%8E%AF+%E8%87%AA%E5%8A%A8%E6%A3%80%E6%B5%8B%E8%81%8A%E5%A4%A9%E4%B8%AD%E7%9A%84+YouTube+%E9%93%BE%E6%8E%A5%EF%BC%8C%E9%80%9A%E8%BF%87+YouTube+Data+API+v3+%E8%8E%B7%E5%8F%96%E8%A7%86%E9%A2%91%E4%BF%A1%E6%81%AF+%F0%9F%93%8A%EF%BC%8C%E6%94%AF%E6%8C%81%E6%96%87%E6%9C%AC%E5%8F%91%E9%80%81+%E6%88%96+Puppeteer+%E6%B8%B2%E6%9F%93%E7%9A%84%E9%A2%84%E8%A7%88%E4%BF%A1%E6%81%AF%E5%9B%BE%E7%89%87+%F0%9F%96%BC%EF%B8%8F%E3%80%82&description=1&forks=1&issues=1&language=1&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Ff%2Ff3%2FKoishi.js_Logo.png&name=1&owner=1&pulls=1&stargazers=1&theme=Auto)
+> 前往 [GitHub](https://github.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork) 或 [Gitee](https://gitee.com/vincent-zyu/koishi-plugin-youtube-vincentzyu-fork) 阅读 README，获得更佳体验。
+
+![koishi-plugin-youtube-vincentzyu-fork](https://socialify.git.ci/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork/image?description=1&forks=1&issues=1&language=1&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Ff%2Ff3%2FKoishi.js_Logo.png&name=1&owner=1&pulls=1&stargazers=1&theme=Auto)
 
 # 🎯 koishi-plugin-youtube-vincentzyu-fork
 
@@ -196,27 +198,43 @@ ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf
 
 | 配置项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `platformWhitelistArr` | `array` | `onebot / 1830540513 / true` | 平台 + 用户 ID 白名单规则表，每行包含 `platform`、`userId`、`enabled` |
+| `enablePlatformWhitelist` | `boolean` | `false` | 是否启用白名单校验；关闭时所有平台、所有用户都直接放行，不检查下面两个表 |
+| `platformWhitelistPlatformArr` | `array` | `onebot / true`、`kook / true`、`qq / false` | 需要进行白名单校验的平台表，每行包含 `platform`、`enabled` |
+| `platformWhitelistUserArr` | `array` | `123456789 / true`、`1830540513 / true` | 白名单用户 ID 表，每行包含 `userId`、`enabled` |
 | `sendWhiteListHint` | `boolean` | `false` | 是否发送白名单命中 / 跳过提示 |
 
 白名单配置示例：
 
 ```json
-[
-  {
-    "platform": "onebot",
-    "userId": "123456789",
-    "enabled": true
-  },
-  {
-    "platform": "onebot",
-    "userId": "987654321",
-    "enabled": false
-  }
-]
+{
+  "platformWhitelistPlatformArr": [
+    {
+      "platform": "onebot",
+      "enabled": true
+    },
+    {
+      "platform": "kook",
+      "enabled": true
+    },
+    {
+      "platform": "qq",
+      "enabled": false
+    }
+  ],
+  "platformWhitelistUserArr": [
+    {
+      "userId": "123456789",
+      "enabled": true
+    },
+    {
+      "userId": "1830540513",
+      "enabled": true
+    }
+  ]
+}
 ```
 
-只有当前平台存在启用的白名单规则时才会拦截非白名单用户；没有配置当前平台时默认放行。`enabled = false` 的行会被忽略，适合临时停用某个用户规则。
+只有开启 `enablePlatformWhitelist` 后才会校验白名单。开启后，插件会先检查当前 `session.platform` 是否命中 `platformWhitelistPlatformArr` 中 `enabled=true` 的平台；未列入的平台或 `enabled=false` 的平台会直接放行。命中平台后，再检查 `platformWhitelistUserArr`，只有 `session.userId` 命中 `enabled=true` 的用户才会继续解析。`sendWhiteListHint` 只控制是否发送校验结果提示，不影响白名单是否生效。
 
 ### 🖥️ REST 服务配置
 

@@ -112,8 +112,8 @@ export const usage = `
 
 <h2>📦 项目链接</h2>
 <ul>
-  <li><a href="https://github.com/H4M5TER/koishi-plugin-youtube" target="_blank">上游仓库：H4M5TER/koishi-plugin-youtube</a></li>
-  <li><a href="https://github.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork" target="_blank">本插件 GitHub 仓库</a></li>
-  <li><a href="https://gitee.com/vincent-zyu/koishi-plugin-youtube-vincentzyu-fork" target="_blank">本插件 Gitee 仓库</a></li>
+  <li><a href="https://github.com/H4M5TER/koishi-plugin-youtube" target="_blank">【点我跳转->】上游仓库：H4M5TER/koishi-plugin-youtube</a></li>
+  <li><a href="https://github.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork" target="_blank">【点我跳转->】本插件 GitHub 仓库</a></li>
+  <li><a href="https://gitee.com/vincent-zyu/koishi-plugin-youtube-vincentzyu-fork" target="_blank">【点我跳转->】本插件 Gitee 仓库</a></li>
 </ul>
 `;
