@@ -93,8 +93,9 @@ export interface Config {
   // 🛡️ 平台白名单配置字段
   // ==================
   platformWhitelistArr: {
-    platformName: string,
-    userIdWhilelist: Array<string>,
+    platform: string,
+    userId: string,
+    enabled: boolean,
   }[]
   sendWhiteListHint: boolean;
 
@@ -252,23 +253,24 @@ export const Config: z<Config> = z.intersect([
   z.object({
     platformWhitelistArr: z.array(
       z.object({
-        platformName: z.string()
+        platform: z.string()
           .description('🏷️ 平台名称'),
-        userIdWhilelist: z.array(
-          z.string().description('👤 白名单用户 ID')
-        )
-          .role('table')
-          .description('📋 白名单用户 ID 列表')
+        userId: z.string()
+          .description('👤 白名单用户 ID'),
+        enabled: z.boolean()
+          .default(true)
+          .description('✅ 是否启用')
       })
     )
       .role('table')
       .default([
         {
-          platformName: 'onebot',
-          userIdWhilelist: ['1830540513']
+          platform: 'onebot',
+          userId: '1830540513',
+          enabled: true
         }
       ])
-      .description('⚠️ YouTube 有些内容不适合发到国内聊天平台 (如 onebot)，所以加了这个配置项 hhh'),
+      .description('⚠️ YouTube 有些内容不适合发到国内聊天平台 (如 onebot)，所以加了这个配置项 hhh。<br> 每行表示一个平台 + 用户 ID 白名单规则，可用最右边一列 `enabled` 进行临时停用。'),
     sendWhiteListHint: z.boolean()
       .default(false)
       .description('💡 是否发送白名单校验结果提示 <br/> ✅ 白名单用户，开始解析链接... <br/> ❌ 非白名单用户，已跳过解析。')

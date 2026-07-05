@@ -149,11 +149,11 @@ export function apply(ctx: Context, config: Config) {
 
     let isValidUser: boolean = true;
     if (config.platformWhitelistArr && config.platformWhitelistArr.length > 0) {
-      const platformConfig = config.platformWhitelistArr.find(item => item.platformName === session.platform)
-      if (platformConfig && platformConfig.userIdWhilelist && platformConfig.userIdWhilelist.length > 0) {
-        if (!platformConfig.userIdWhilelist.includes(session.userId)) {
-          isValidUser = false;
-        }
+      const platformWhitelistRules = config.platformWhitelistArr
+        .filter(item => item.enabled && item.platform === session.platform && item.userId);
+
+      if (platformWhitelistRules.length > 0 && !platformWhitelistRules.some(item => item.userId === session.userId)) {
+        isValidUser = false;
       }
     }
 

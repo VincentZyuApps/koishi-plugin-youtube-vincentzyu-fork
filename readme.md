@@ -5,7 +5,7 @@
 > 🍴 forked from [H4M5TER/koishi-plugin-youtube](https://github.com/H4M5TER/koishi-plugin-youtube)
 
 [![npm](https://img.shields.io/npm/v/koishi-plugin-youtube-vincentzyu-fork?style=flat-square&logo=npm)](https://www.npmjs.com/package/koishi-plugin-youtube-vincentzyu-fork)
-[![npm-download](https://img.shields.io/npm/dm/koishi-plugin-youtube-vincentzyu-fork?style=flat-square&logo=npm)](https://www.npmjs.com/package/koishi-plugin-youtube-vincentzyu-fork)
+[![npm-download](https://img.shields.io/npm/dm/koishi-plugin-youtube-vincentzyu-fork?style=flat-square&logo=npm)](https://npm-stat.com/charts.html?package=koishi-plugin-youtube-vincentzyu-fork)
 
 [![YouTube](https://img.shields.io/badge/YouTube-Data%20API%20v3-FF0000?style=flat-square&logo=youtube&logoColor=white)](https://developers.google.com/youtube/v3)
 [![Koishi](https://img.shields.io/badge/Koishi-plugin-5546A3?style=flat-square&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAABU0lEQVR42p2UQSsFYRSGnxnqLuytKWKpKFkQNsS%2FsOHPWPADLCmxU5S7UzYWNrJR7lYiRF2FeWzOMKZ7mXHqNNP5vvP2nu%2B850CY2lP4X1K31ZbaDm%2BpO%2Bpyp5wfAXVEPfRvO1JHf4AVQGbUh7j4EZ4VkrNCXPVRnf3CUBN1SH2KC28VGOV3ntRhNclZHdcAKYM11QR1oVBOXctzFlNgBTC8qmXxPQEegbVeYApIgJT6tg%2F0AdMp0B%2FBpCabK2AAmAAa%2F2GRBft1oBFPkqTAba7LCiAfQC9wClwAY1HJHepuiO29Yrsf1Dn1uiDU3RTYCtTkl1Leg8k9MB4NGgReI28rV3azgyCz0og01Xl1Uz1QX8uCTELm3UbkTF1VJ9Wr0tn3iBSGdjYG0XivE3VN3VD31PM4a3cc2tIGGI0VkTO7rLxGuiy25ejmjfqsvkSXui62TxaK03td4FXTAAAAAElFTkSuQmCC)](https://koishi.chat/zh-CN/market/)
@@ -196,7 +196,7 @@ ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf
 
 | 配置项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `platformWhitelistArr` | `array` | `onebot / 1830540513` | 平台 + 用户 ID 白名单 |
+| `platformWhitelistArr` | `array` | `onebot / 1830540513 / true` | 平台 + 用户 ID 白名单规则表，每行包含 `platform`、`userId`、`enabled` |
 | `sendWhiteListHint` | `boolean` | `false` | 是否发送白名单命中 / 跳过提示 |
 
 白名单配置示例：
@@ -204,11 +204,19 @@ ctx.baseDir/data/fonts/LXGWWenKaiMono-Regular.ttf
 ```json
 [
   {
-    "platformName": "onebot",
-    "userIdWhilelist": ["123456789", "987654321"]
+    "platform": "onebot",
+    "userId": "123456789",
+    "enabled": true
+  },
+  {
+    "platform": "onebot",
+    "userId": "987654321",
+    "enabled": false
   }
 ]
 ```
+
+只有当前平台存在启用的白名单规则时才会拦截非白名单用户；没有配置当前平台时默认放行。`enabled = false` 的行会被忽略，适合临时停用某个用户规则。
 
 ### 🖥️ REST 服务配置
 
