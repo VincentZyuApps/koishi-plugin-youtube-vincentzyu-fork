@@ -2,11 +2,13 @@
 
 # 🎯 koishi-plugin-youtube-vincentzyu-fork
 
+> 🍴 forked from [H4M5TER/koishi-plugin-youtube](https://github.com/H4M5TER/koishi-plugin-youtube)
+
 [![npm](https://img.shields.io/npm/v/koishi-plugin-youtube-vincentzyu-fork?style=flat-square&logo=npm)](https://www.npmjs.com/package/koishi-plugin-youtube-vincentzyu-fork)
 [![npm-download](https://img.shields.io/npm/dm/koishi-plugin-youtube-vincentzyu-fork?style=flat-square&logo=npm)](https://www.npmjs.com/package/koishi-plugin-youtube-vincentzyu-fork)
 
 [![YouTube](https://img.shields.io/badge/YouTube-Data%20API%20v3-FF0000?style=flat-square&logo=youtube&logoColor=white)](https://developers.google.com/youtube/v3)
-[![Koishi](https://img.shields.io/badge/Koishi-plugin-5546A3?style=flat-square&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAABU0lEQVR42p2UQSsFYRSGnxnqLuytKWKpKFkQNsS%2FsOHPWPADLCmxU5S7UzYWNrJR7lYiRF2FeWzOMKZ7mXHqNNP5vvP2nu%2B850CY2lP4X1K31ZbaDm%2BpO%2Bpyp5wfAXVEPfRvO1JHf4AVQGbUh7j4EZ4VkrNCXPVRnf3CUBN1SH2KC28VGOV3ntRhNclZHdcAKYM11QR1oVBOXctzFlNgBTC8qmXxPQEegbVeYApIgJT6tg%2F0AdMp0B%2FBpCabK2AAmAAa%2F2GRBft1oBFPkqTAba7LCiAfQC9wClwAY1HJHepuiO29Yrsf1Dn1uiDU3RTYCtTkl1Leg8k9MB4NGgReI28rV3azgyCz0og01Xl1Uz1QX8uCTELm3UbkTF1VJ9Wr0tn3iBSGdjYG0XivE3VN3VD31PM4a3cc2tIGGI0VkTO7rLxGuiy25ejmjfqsvkSXui62TxaK03td4FXTAAAAAElFTkSuQmCC)](https://koishi.chat/)
+[![Koishi](https://img.shields.io/badge/Koishi-plugin-5546A3?style=flat-square&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAABU0lEQVR42p2UQSsFYRSGnxnqLuytKWKpKFkQNsS%2FsOHPWPADLCmxU5S7UzYWNrJR7lYiRF2FeWzOMKZ7mXHqNNP5vvP2nu%2B850CY2lP4X1K31ZbaDm%2BpO%2Bpyp5wfAXVEPfRvO1JHf4AVQGbUh7j4EZ4VkrNCXPVRnf3CUBN1SH2KC28VGOV3ntRhNclZHdcAKYM11QR1oVBOXctzFlNgBTC8qmXxPQEegbVeYApIgJT6tg%2F0AdMp0B%2FBpCabK2AAmAAa%2F2GRBft1oBFPkqTAba7LCiAfQC9wClwAY1HJHepuiO29Yrsf1Dn1uiDU3RTYCtTkl1Leg8k9MB4NGgReI28rV3azgyCz0og01Xl1Uz1QX8uCTELm3UbkTF1VJ9Wr0tn3iBSGdjYG0XivE3VN3VD31PM4a3cc2tIGGI0VkTO7rLxGuiy25ejmjfqsvkSXui62TxaK03td4FXTAAAAAElFTkSuQmCC)](https://koishi.chat/zh-CN/market/)
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VincentZyuApps/koishi-plugin-youtube-vincentzyu-fork)
 [![Gitee](https://img.shields.io/badge/Gitee-C71D23?style=for-the-badge&logo=gitee&logoColor=white)](https://gitee.com/vincent-zyu/koishi-plugin-youtube-vincentzyu-fork)
@@ -20,10 +22,7 @@
 <p>💬 插件使用问题 / 🐛 Bug反馈 / 👨‍💻 插件开发交流，欢迎加入QQ群：<b>1085190201</b> 🎉</p>
 <p>💡 在群里直接艾特我，回复的更快哦~ ✨</p>
 
-
-> 📺 自动识别聊天中的 YouTube 链接，通过 YouTube Data API v3 获取视频信息，并返回文本或 Puppeteer 渲染图片。  
-
-> 🍴 forked from [H4M5TER/koishi-plugin-youtube](https://github.com/H4M5TER/koishi-plugin-youtube)
+🎯 Koishi 插件 - 自动检测聊天中的 YouTube 链接，通过 YouTube Data API v3 获取视频信息 📊，支持文本发送 或 Puppeteer 渲染的预览信息图片 🖼️。支持独立模式/REST 分布式部署、SOCKS/HTTP 代理、平台白名单。
 
 ## ✨ 功能特性
 
